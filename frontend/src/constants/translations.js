@@ -17,7 +17,7 @@ export const translations = {
     resetFilters: "Reset filters",
 
     // Header
-    searchPlaceholder: "Search sneakers...",
+    searchPlaceholder: "Search ...",
     collection: "Collection",
     cart: "Cart",
     myProfile: "My Profile",
@@ -334,7 +334,7 @@ export const translations = {
     resetFilters: "Réinitialiser les filtres",
 
     // Header
-    searchPlaceholder: "Rechercher des sneakers...",
+    searchPlaceholder: "Rechercher ...",
     collection: "Collection",
     cart: "Panier",
     myProfile: "Mon Profil",
