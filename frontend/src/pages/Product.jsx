@@ -511,7 +511,7 @@ export default function Product() {
             <div className="prose max-w-none text-gray-50 text-sm leading-relaxed space-y-3">
               <p>{t(productData.description)}</p>
               <p>
-                {t("Every pair of sneakers offered by Měilì is thoroughly inspected to ensure top-notch build quality and optimal all-day comfort.")}
+                {t("Each product in the Měilì collection goes through a rigorous quality check to ensure excellent craftsmanship and a perfect fit")}
               </p>
             </div>
           )}
