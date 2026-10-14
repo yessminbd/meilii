@@ -1,66 +1,12 @@
 import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import slide1 from "../assets/slide1.jpg";
-import slide2 from "../assets/slide2.jpg";
-import slide3 from "../assets/slide3.jpg";
-import slide4 from "../assets/slide4.jpg";
 
 export const ShopContext = createContext();
 
-// Catalogue initial avec les sneakers de la collection en attendant les données backend
-const defaultProducts = [
-  {
-    _id: "sw_01",
-    name: "Adidas Campus 00s Pink",
-    category: "Women",
-    subCategory: "Adidas",
-    price: 380,
-    description: "Iconic suede silhouette with bold pink contrast and retro chunky laces.",
-    image: [slide1],
-    popular: true,
-    sizes: ["36", "37", "38", "39", "40", "41"],
-    colors: ["Pink", "White"],
-  },
-  {
-    _id: "sw_02",
-    name: "New Balance 530 White Silver",
-    category: "Men",
-    subCategory: "New Balance",
-    price: 420,
-    description: "Classic running shoe aesthetic with ABZORB cushioning for all-day comfort.",
-    image: [slide2],
-    popular: true,
-    sizes: ["38", "39", "40", "41", "42", "43", "44"],
-    colors: ["White", "Silver", "Grey"],
-  },
-  {
-    _id: "sw_03",
-    name: "On Cloudmonster All Black",
-    category: "Men",
-    subCategory: "On Running",
-    price: 540,
-    description: "Maximum CloudTec cushioning for monster bounce and premium street look.",
-    image: [slide3],
-    popular: true,
-    sizes: ["40", "41", "42", "43", "44", "45"],
-    colors: ["Black"],
-  },
-  {
-    _id: "sw_04",
-    name: "Puma Speedcat OG Red",
-    category: "Women",
-    subCategory: "Puma",
-    price: 350,
-    description: "Motorsport heritage with rich red suede and timeless racing profile.",
-    image: [slide4],
-    popular: true,
-    sizes: ["39", "40", "41", "42", "43"],
-    colors: ["Red", "White"],
-  },
-];
+
 
 export default function ShopContextProvider({ children }) {
-  const [products, setProducts] = useState(defaultProducts);
+  const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [cartItems, setCartItems] = useState({});

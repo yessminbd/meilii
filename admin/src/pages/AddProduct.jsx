@@ -4,10 +4,10 @@ import { toast } from 'react-toastify'
 import { Upload, Loader2 } from 'lucide-react'
 
 import { useProductConfig } from '../hooks/useProductConfig'
-import { BACKEND_URL, CATEGORIES } from '../components/constants.js'
+import { BACKEND_URL } from '../components/constants.js'
 import { card, sectionTitle, label, field } from '../components/styles.js'
 import ImageUpload from '../components/ImageUpload.jsx'
-import BrandSelector from '../components/BrandSelector.jsx'
+import CategorySubCategorySelector from '../components/CategorySubCategorySelector.jsx'
 import ColorPicker from '../components/ColorPicker.jsx'
 import SizeSelector from '../components/SizeSelector.jsx'
 
@@ -18,8 +18,10 @@ const AddProduct = ({ token }) => {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
-  const [selectedCategories, setSelectedCategories] = useState(['Men'])
-  const [subCategory, setSubCategory] = useState('Nike')
+  const [originalPrice, setOriginalPrice] = useState('')
+  const [pattern, setPattern] = useState('')
+  const [category, setCategory] = useState('')
+  const [subCategory, setSubCategory] = useState('')
   const [popular, setPopular] = useState(false)
   const [images, setImages] = useState([null, null, null, null])
   const [loading, setLoading] = useState(false)
@@ -29,7 +31,7 @@ const AddProduct = ({ token }) => {
   const [selectedColors, setSelectedColors] = useState([])
 
   // Lists from backend (falls back to static defaults)
-  const { brands, sizes, colors, addBrand, addSize, addColor: addColorToConfig } = useProductConfig()
+  const { sizes, colors, addSize, addColor: addColorToConfig } = useProductConfig()
 
   // Helpers
   const toggle = (setter) => (item) =>
@@ -50,21 +52,14 @@ const AddProduct = ({ token }) => {
     toast.success(`Size ${size} added.`)
   }
 
-  const handleAddBrand = (brand) => {
-    addBrand(brand)
-    toast.success(`Brand "${brand}" added.`)
-  }
-
-  const toggleCategory = (cat) =>
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-    )
-
   const resetForm = () => {
     setName('')
     setDescription('')
     setPrice('')
-    setSelectedCategories(['Men'])
+    setOriginalPrice('')
+    setPattern('')
+    setCategory('')
+    setSubCategory('')
     setSelectedSizes([])
     setSelectedColors([])
     setImages([null, null, null, null])
@@ -73,9 +68,8 @@ const AddProduct = ({ token }) => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault()
-    if (selectedCategories.length === 0) return toast.error('Select at least one category.')
-    if (selectedSizes.length === 0) return toast.error('Select at least one size.')
-    if (selectedColors.length === 0) return toast.error('Select at least one color.')
+    if (!category) return toast.error('Please select a category.')
+    if (!subCategory) return toast.error('Please select a subcategory.')
     if (!images[0]) return toast.error('Add at least one image.')
 
     setLoading(true)
@@ -84,7 +78,9 @@ const AddProduct = ({ token }) => {
       formData.append('name', name)
       formData.append('description', description)
       formData.append('price', price)
-      formData.append('category', JSON.stringify(selectedCategories))
+      if (originalPrice) formData.append('originalPrice', originalPrice)
+      if (pattern) formData.append('pattern', pattern)
+      formData.append('category', JSON.stringify([category]))
       formData.append('subCategory', subCategory)
       formData.append('sizes', JSON.stringify(selectedSizes))
       formData.append('colors', JSON.stringify(selectedColors))
@@ -153,50 +149,59 @@ const AddProduct = ({ token }) => {
               className={`${field} resize-none`}
             />
           </div>
-          <div>
-            <label className={label}>Price (TND)</label>
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
-              min="0"
-              placeholder="120"
-              className={field}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className={label}>Selling Price</label>
+              <input
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                required
+                min="0"
+                step="any"
+                placeholder="e.g. 120"
+                className={field}
+              />
+            </div>
+            <div>
+              <label className={label}>
+                Original Price
+              </label>
+              <input
+                type="number"
+                value={originalPrice}
+                onChange={(e) => setOriginalPrice(e.target.value)}
+                min="0"
+                step="any"
+                placeholder="e.g. 180"
+                className={field}
+              />
+            </div>
+            <div>
+              <label className={label}>
+                Pattern 
+              </label>
+              <input
+                type="text"
+                value={pattern}
+                onChange={(e) => setPattern(e.target.value)}
+                placeholder="e.g. Floral, Camo, Stripes..."
+                className={field}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Category & Brand */}
+        {/* Category & SubCategory */}
         <div className={card}>
-          <h3 className={sectionTitle}>Category & Brand</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={label}>Category</label>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {CATEGORIES.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => toggleCategory(c)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                      selectedCategories.includes(c)
-                        ? 'bg-[#1f1f23] text-white border-[#1f1f23]'
-                        : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <BrandSelector
-              brands={brands}
-              value={subCategory}
-              onChange={setSubCategory}
-              onAdd={handleAddBrand}
-            />
-          </div>
+          <h3 className={sectionTitle}>Category & Subcategory</h3>
+          <CategorySubCategorySelector
+            token={token}
+            selectedCategory={category}
+            onCategoryChange={setCategory}
+            subCategory={subCategory}
+            onSubCategoryChange={setSubCategory}
+          />
         </div>
 
         {/* Colors */}

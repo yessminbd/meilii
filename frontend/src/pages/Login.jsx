@@ -4,7 +4,7 @@ import { useLang } from '../context/LangContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import sneaker1 from '../assets/slide3.jpg';
+import sneaker1 from '../assets/login-square.svg';
 
 const ADMIN_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5173';
 
@@ -105,7 +105,7 @@ export default function Login() {
 
         <img
           src={sneaker1}
-          alt="Shoe Box"
+          alt="Měilì"
           className="absolute inset-0 w-full h-full object-cover opacity-60"
         />
 
@@ -253,7 +253,7 @@ export default function Login() {
 
           {/* Mobile image */}
           <div className="lg:hidden mt-10 rounded-2xl overflow-hidden h-44 w-full">
-            <img src={sneaker1} alt="Shoe Box" className="w-full h-full object-cover" />
+            <img src={sneaker1} alt="Měilì" className="w-full h-full object-cover" />
           </div>
         </div>
       </div>

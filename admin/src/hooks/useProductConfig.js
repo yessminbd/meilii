@@ -38,10 +38,27 @@ export const useProductConfig = () => {
 
           // Sizes: server returns strings; merge with default SIZES list
           const serverSizeSet = new Set(data.sizes)
+          const textOrder = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '2XL', '3XL', '4XL', 'TU', 'UNIQUE']
           const mergedSizes = [
             ...SIZES.filter((s) => !serverSizeSet.has(s)),
             ...data.sizes,
-          ].sort((a, b) => parseFloat(a) - parseFloat(b))
+          ].sort((a, b) => {
+            const numA = parseFloat(a)
+            const numB = parseFloat(b)
+            const isNumA = !isNaN(numA) && String(numA) === String(a).trim()
+            const isNumB = !isNaN(numB) && String(numB) === String(b).trim()
+
+            if (isNumA && isNumB) return numA - numB
+            if (isNumA && !isNumB) return 1
+            if (!isNumA && isNumB) return -1
+
+            const idxA = textOrder.indexOf(String(a).toUpperCase())
+            const idxB = textOrder.indexOf(String(b).toUpperCase())
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB
+            if (idxA !== -1) return -1
+            if (idxB !== -1) return 1
+            return String(a).localeCompare(String(b))
+          })
           setServerSizes(mergedSizes)
 
           // Colors: server returns only names (strings). Build COLORS-like objects.

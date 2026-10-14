@@ -6,9 +6,12 @@ const orderScehama = new mongoose.Schema({
     items: { type: Array, required: true },
     amount: { type: Number, required: true },
     address: { type: Object, required: true },
-    status: { type: String, required: true, default: "En attente d'emballage" },
+    status: { type: String, required: true, default: "Order Placed" },
     paymentMethod: { type: String, required: true },
     payment: { type: Boolean, required: true, default: false },
+    advanceAmount: { type: Number, default: 0 },
+    advancePaid: { type: Boolean, default: false },
+    remainingAmount: { type: Number, default: 0 },
     date: { type: Number, required: true },
 
 })

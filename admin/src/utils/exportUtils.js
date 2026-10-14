@@ -27,6 +27,21 @@ export const formatDateOnly = (timestamp) => {
   })
 }
 
+// Helper to calculate original price of an order (before discount or base catalog items sum)
+export const calculateOrderOriginalPrice = (order) => {
+  if (Array.isArray(order?.items) && order.items.length > 0) {
+    const sum = order.items.reduce((acc, item) => {
+      const p = Number(item.price) || 0
+      const q = Number(item.quantity) || 1
+      return acc + p * q
+    }, 0)
+    if (sum > 0) return sum
+  }
+  const discount = Number(order?.discount) || 0
+  const amount = Number(order?.amount) || 0
+  return amount + discount
+}
+
 // -------------------------------------------------------------
 // EXCEL EXPORT HELPERS
 // -------------------------------------------------------------
@@ -47,6 +62,10 @@ export const exportOrdersToExcel = (orders, filterSummary = {}) => {
     const totalQty = Array.isArray(order.items)
       ? order.items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0)
       : 0
+    const originalPrice = calculateOrderOriginalPrice(order)
+    const amount = Number(order.amount) || 0
+    const advance = Number(order.advanceAmount) || 0
+    const remaining = Math.max(0, amount - advance)
 
     return {
       '#': index + 1,
@@ -60,7 +79,11 @@ export const exportOrdersToExcel = (orders, filterSummary = {}) => {
         : 'N/A',
       'Ordered Items': itemsDescription,
       'Total Items': totalQty,
-      'Total Amount (TND)': Number(order.amount) || 0,
+      'Original Price (TND)': originalPrice,
+      'Total Amount (TND)': amount,
+      'Advance (TND)': advance,
+      'Advance Paid': order.advancePaid ? 'Yes' : 'No',
+      'Remaining Due (TND)': remaining,
       'Payment Method': order.paymentMethod || 'N/A',
       'Payment Status': order.payment ? 'Paid' : 'Pending',
       'Order Status': order.status || 'Pending',
@@ -81,7 +104,11 @@ export const exportOrdersToExcel = (orders, filterSummary = {}) => {
     { wch: 32 },  // Address
     { wch: 45 },  // Items
     { wch: 14 },  // Qty
+    { wch: 18 },  // Original Price
     { wch: 18 },  // Amount
+    { wch: 16 },  // Advance
+    { wch: 14 },  // Advance Paid
+    { wch: 18 },  // Remaining Due
     { wch: 16 },  // Method
     { wch: 16 },  // Payment status
     { wch: 18 },  // Status
@@ -90,10 +117,12 @@ export const exportOrdersToExcel = (orders, filterSummary = {}) => {
   XLSX.utils.book_append_sheet(wb, ws, 'Orders')
 
   const totalAmount = orders.reduce((sum, o) => sum + (Number(o.amount) || 0), 0)
+  const totalAdvances = orders.reduce((sum, o) => sum + (Number(o.advanceAmount) || 0), 0)
   const metaData = [
     { Property: 'Generated on', Value: formatDate(Date.now()) },
     { Property: 'Total Orders', Value: orders.length },
     { Property: 'Total Revenue', Value: `${totalAmount.toLocaleString('en-US')} TND` },
+    { Property: 'Total Advances', Value: `${totalAdvances.toLocaleString('en-US')} TND` },
     { Property: 'Status Filter', Value: filterSummary.status || 'All' },
     { Property: 'Period Filter', Value: filterSummary.period || 'All' },
     { Property: 'Payment Method Filter', Value: filterSummary.paymentMethod || 'All' },
@@ -103,7 +132,7 @@ export const exportOrdersToExcel = (orders, filterSummary = {}) => {
   XLSX.utils.book_append_sheet(wb, wsMeta, 'Filters Summary')
 
   const dateStr = new Date().toISOString().slice(0, 10)
-  XLSX.writeFile(wb, `Shoe Box_Orders_${dateStr}.xlsx`)
+  XLSX.writeFile(wb, `Meili_Orders_${dateStr}.xlsx`)
 }
 
 export const exportProductsToExcel = (products, filterSummary = {}) => {
@@ -167,7 +196,7 @@ export const exportProductsToExcel = (products, filterSummary = {}) => {
   XLSX.utils.book_append_sheet(wb, wsMeta, 'Filters Summary')
 
   const dateStr = new Date().toISOString().slice(0, 10)
-  XLSX.writeFile(wb, `Shoe Box_Products_${dateStr}.xlsx`)
+  XLSX.writeFile(wb, `Meili_Products_${dateStr}.xlsx`)
 }
 
 export const exportStatsReportToExcel = (statsData, filterSummary = {}) => {
@@ -211,11 +240,11 @@ export const exportStatsReportToExcel = (statsData, filterSummary = {}) => {
   XLSX.utils.book_append_sheet(wb, wsTop, 'Top Sneakers')
 
   const dateStr = new Date().toISOString().slice(0, 10)
-  XLSX.writeFile(wb, `Shoe Box_Analytics_Report_${dateStr}.xlsx`)
+  XLSX.writeFile(wb, `Meili_Analytics_Report_${dateStr}.xlsx`)
 }
 
 // -------------------------------------------------------------
-// PDF EXPORT HELPERS (Styled with Shoe Box Branding)
+// PDF EXPORT HELPERS (Styled with Měilì Branding)
 // -------------------------------------------------------------
 
 const addPdfHeader = (doc, title, subtitle, filterSummary = {}) => {
@@ -233,7 +262,7 @@ const addPdfHeader = (doc, title, subtitle, filterSummary = {}) => {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(16)
   doc.setTextColor(255, 255, 255)
-  doc.text('SHOE BOX', 14, 15)
+  doc.text('MĚILÌ', 14, 15)
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
@@ -284,7 +313,7 @@ const addPdfFooter = (doc) => {
     doc.setDrawColor(220, 220, 225)
     doc.line(14, pageHeight - 12, pageWidth - 14, pageHeight - 12)
 
-    doc.text('Shoe Box - Confidential Internal Analytics Report', 14, pageHeight - 7)
+    doc.text('Měilì - Confidential Internal Analytics Report', 14, pageHeight - 7)
     const pageStr = `Page ${i} of ${pageCount}`
     const pWidth = doc.getTextWidth(pageStr)
     doc.text(pageStr, pageWidth - pWidth - 14, pageHeight - 7)
@@ -301,6 +330,7 @@ export const exportOrdersToPdf = (orders, filterSummary = {}, options = {}) => {
   )
 
   const totalAmount = orders.reduce((sum, o) => sum + (Number(o.amount) || 0), 0)
+  const totalAdvances = orders.reduce((sum, o) => sum + (Number(o.advanceAmount) || 0), 0)
   const avgOrder = orders.length ? (totalAmount / orders.length).toFixed(1) : 0
 
   // Summary KPI Cards in PDF
@@ -310,11 +340,14 @@ export const exportOrdersToPdf = (orders, filterSummary = {}, options = {}) => {
   doc.roundedRect(14, startY, 269, 14, 2, 2, 'S')
 
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(9)
+  doc.setFontSize(8.5)
   doc.setTextColor(31, 31, 35)
   doc.text(`Total Orders: ${orders.length}`, 20, startY + 9)
-  doc.text(`Revenue: ${totalAmount.toLocaleString('en-US')} TND`, 90, startY + 9)
-  doc.text(`Average Order: ${avgOrder} TND`, 190, startY + 9)
+  doc.text(`Total Amount: ${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })} TND`, 80, startY + 9)
+  doc.setTextColor(180, 83, 9)
+  doc.text(`Total Advances: ${totalAdvances.toLocaleString('en-US', { minimumFractionDigits: 2 })} TND`, 150, startY + 9)
+  doc.setTextColor(31, 31, 35)
+  doc.text(`Average Order: ${avgOrder} TND`, 220, startY + 9)
 
   const tableRows = orders.map((o, idx) => {
     const customer = o.address ? `${o.address.firstName || ''} ${o.address.lastName || ''}`.trim() : 'Customer'
@@ -326,6 +359,10 @@ export const exportOrdersToPdf = (orders, filterSummary = {}, options = {}) => {
     const itemsDetail = Array.isArray(o.items)
       ? o.items.map((i) => `${i.name} (x${i.quantity || 1})`).join(', ')
       : '-'
+    const advanceVal = Number(o.advanceAmount) || 0
+    const advanceText = advanceVal > 0
+      ? `${advanceVal.toFixed(2)} TND ${o.advancePaid ? '(Paid)' : '(Pending)'}`
+      : '0.00 TND'
 
     return [
       idx + 1,
@@ -334,8 +371,9 @@ export const exportOrdersToPdf = (orders, filterSummary = {}, options = {}) => {
       customer,
       phone,
       city,
-      itemsCount > 1 ? `${itemsCount} items (${itemsDetail.slice(0, 30)}...)` : itemsDetail.slice(0, 35),
-      `${o.amount || 0} TND`,
+      itemsCount > 1 ? `${itemsCount} items (${itemsDetail.slice(0, 24)}...)` : itemsDetail.slice(0, 28),
+      `${(Number(o.amount) || 0).toFixed(2)} TND`,
+      advanceText,
       o.paymentMethod || 'COD',
       o.status || 'Pending',
     ]
@@ -344,7 +382,7 @@ export const exportOrdersToPdf = (orders, filterSummary = {}, options = {}) => {
   autoTable(doc, {
     startY: startY + 18,
     head: [
-      ['#', 'Ref', 'Date', 'Customer', 'Phone', 'City', 'Items', 'Amount', 'Payment', 'Status'],
+      ['#', 'Ref', 'Date', 'Customer', 'Phone', 'City', 'Items', 'Total', 'Advance', 'Payment', 'Status'],
     ],
     body: tableRows,
     theme: 'grid',
@@ -356,7 +394,7 @@ export const exportOrdersToPdf = (orders, filterSummary = {}, options = {}) => {
       halign: 'center',
     },
     bodyStyles: {
-      fontSize: 8,
+      fontSize: 7.5,
       textColor: [40, 40, 40],
       cellPadding: 2,
     },
@@ -365,15 +403,16 @@ export const exportOrdersToPdf = (orders, filterSummary = {}, options = {}) => {
     },
     columnStyles: {
       0: { halign: 'center', cellWidth: 8 },
-      1: { halign: 'center', cellWidth: 16, fontStyle: 'bold' },
+      1: { halign: 'center', cellWidth: 18, fontStyle: 'bold' },
       2: { halign: 'center', cellWidth: 20 },
-      3: { cellWidth: 32 },
-      4: { cellWidth: 24 },
-      5: { cellWidth: 24 },
-      6: { cellWidth: 65 },
-      7: { halign: 'right', fontStyle: 'bold', cellWidth: 22 },
-      8: { halign: 'center', cellWidth: 20 },
-      9: { halign: 'center', cellWidth: 28 },
+      3: { cellWidth: 28 },
+      4: { cellWidth: 22 },
+      5: { cellWidth: 22 },
+      6: { cellWidth: 54 },
+      7: { halign: 'right', fontStyle: 'bold', cellWidth: 24 },
+      8: { halign: 'right', fontStyle: 'bold', cellWidth: 32, textColor: [180, 83, 9] },
+      9: { halign: 'center', cellWidth: 18 },
+      10: { halign: 'center', cellWidth: 23 },
     },
     didDrawPage: () => {},
   })
@@ -385,7 +424,152 @@ export const exportOrdersToPdf = (orders, filterSummary = {}, options = {}) => {
     const blobUrl = doc.output('bloburl')
     window.open(blobUrl, '_blank')
   } else {
-    doc.save(`Shoe Box_Orders_${dateStr}.pdf`)
+    doc.save(`Meili_Orders_${dateStr}.pdf`)
+  }
+}
+
+/**
+ * Imprime / Exporte le document officiel de suivi des avances (Print Avance)
+ * Contient un tableau avec : N° Commande, Nom Client, Total, Avance et Prix Original
+ */
+export const exportAdvancesReportToPdf = (orders, filterSummary = {}, options = {}) => {
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
+  const startY = addPdfHeader(
+    doc,
+    options.title || 'SUIVI DES AVANCES & PRIX ORIGINAUX (COMMANDES)',
+    `Rapport d'audit des acomptes pour ${orders.length} commande(s) filtrée(s).`,
+    filterSummary
+  )
+
+  const totalAmount = orders.reduce((sum, o) => sum + (Number(o.amount) || 0), 0)
+  const totalAdvances = orders.reduce((sum, o) => sum + (Number(o.advanceAmount) || 0), 0)
+  const totalOriginal = orders.reduce((sum, o) => sum + calculateOrderOriginalPrice(o), 0)
+  const totalRemaining = Math.max(0, totalAmount - totalAdvances)
+  const withAdvanceCount = orders.filter((o) => (Number(o.advanceAmount) || 0) > 0).length
+  const advancePaidCount = orders.filter((o) => o.advancePaid).length
+
+  // KPI Summary box (Landscape A4: 269mm wide)
+  doc.setFillColor(248, 249, 250)
+  doc.roundedRect(14, startY, 269, 16, 2, 2, 'F')
+  doc.setDrawColor(225, 228, 232)
+  doc.roundedRect(14, startY, 269, 16, 2, 2, 'S')
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(8.5)
+  doc.setTextColor(31, 31, 35)
+  doc.text(`Commandes : ${orders.length} (${withAdvanceCount} avec avance)`, 20, startY + 6.5)
+  doc.text(`Prix Original Total : ${totalOriginal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TND`, 95, startY + 6.5)
+  doc.text(`Total Commandes : ${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TND`, 185, startY + 6.5)
+
+  doc.setFontSize(8)
+  doc.setTextColor(180, 83, 9) // Amber
+  doc.text(`Total Avances : ${totalAdvances.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TND (${advancePaidCount} payées)`, 20, startY + 12)
+  doc.setTextColor(31, 31, 35)
+  doc.text(`Reste à Recouvrer : ${totalRemaining.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TND`, 95, startY + 12)
+  doc.setTextColor(100, 100, 110)
+  doc.text(`Taux d'Avance : ${totalAmount > 0 ? ((totalAdvances / totalAmount) * 100).toFixed(1) : 0}%`, 185, startY + 12)
+
+  const tableRows = orders.map((o, idx) => {
+    const customer = o.address ? `${o.address.firstName || ''} ${o.address.lastName || ''}`.trim() : 'Client'
+    const phone = o.address?.phone || '-'
+    const origPrice = calculateOrderOriginalPrice(o)
+    const amount = Number(o.amount) || 0
+    const advance = Number(o.advanceAmount) || 0
+    const remaining = Math.max(0, amount - advance)
+    const advanceStatus = advance > 0 ? (o.advancePaid ? 'Payée' : 'Attente') : '0.00'
+
+    return [
+      idx + 1,
+      o._id ? `#${o._id.slice(-8).toUpperCase()}` : '-',
+      formatDateOnly(o.date),
+      customer,
+      phone,
+      `${origPrice.toFixed(2)} TND`,
+      `${amount.toFixed(2)} TND`,
+      advance > 0 ? `${advance.toFixed(2)} TND (${advanceStatus})` : '0.00 TND',
+      `${remaining.toFixed(2)} TND`,
+      o.status || 'Order Placed',
+    ]
+  })
+
+  // Ligne de totaux en bas
+  const footRow = [
+    [
+      'TOTAL',
+      `${orders.length} cdes`,
+      '-',
+      '-',
+      '-',
+      `${totalOriginal.toFixed(2)} TND`,
+      `${totalAmount.toFixed(2)} TND`,
+      `${totalAdvances.toFixed(2)} TND`,
+      `${totalRemaining.toFixed(2)} TND`,
+      '-',
+    ],
+  ]
+
+  autoTable(doc, {
+    startY: startY + 20,
+    head: [
+      [
+        '#',
+        'N° Commande',
+        'Date',
+        'Nom Client',
+        'Téléphone',
+        'Prix Original',
+        'Total',
+        'Avance',
+        'Reste à Payer',
+        'Statut',
+      ],
+    ],
+    body: tableRows,
+    foot: footRow,
+    theme: 'grid',
+    headStyles: {
+      fillColor: [31, 31, 35],
+      textColor: [255, 255, 255],
+      fontStyle: 'bold',
+      fontSize: 8,
+      halign: 'center',
+    },
+    footStyles: {
+      fillColor: [240, 242, 245],
+      textColor: [31, 31, 35],
+      fontStyle: 'bold',
+      fontSize: 8,
+    },
+    bodyStyles: {
+      fontSize: 8,
+      textColor: [40, 40, 40],
+      cellPadding: 2.2,
+    },
+    alternateRowStyles: {
+      fillColor: [250, 250, 252],
+    },
+    columnStyles: {
+      0: { halign: 'center', cellWidth: 8 },
+      1: { halign: 'center', cellWidth: 24, fontStyle: 'bold' },
+      2: { halign: 'center', cellWidth: 20 },
+      3: { cellWidth: 38, fontStyle: 'bold' },
+      4: { cellWidth: 26 },
+      5: { halign: 'right', cellWidth: 28 },
+      6: { halign: 'right', fontStyle: 'bold', cellWidth: 28 },
+      7: { halign: 'right', fontStyle: 'bold', cellWidth: 35, textColor: [180, 83, 9] },
+      8: { halign: 'right', fontStyle: 'bold', cellWidth: 30 },
+      9: { halign: 'center', cellWidth: 32 },
+    },
+  })
+
+  addPdfFooter(doc)
+  const dateStr = new Date().toISOString().slice(0, 10)
+  if (options.mode === 'download') {
+    doc.save(`Meili_Suivi_Avances_${dateStr}.pdf`)
+  } else {
+    doc.autoPrint()
+    const blobUrl = doc.output('bloburl')
+    window.open(blobUrl, '_blank')
   }
 }
 
@@ -463,7 +647,7 @@ export const exportProductsToPdf = (products, filterSummary = {}) => {
 
   addPdfFooter(doc)
   const dateStr = new Date().toISOString().slice(0, 10)
-  doc.save(`Shoe Box_Products_${dateStr}.pdf`)
+  doc.save(`Meili_Products_${dateStr}.pdf`)
 }
 
 export const exportStatsReportToPdf = (statsData, filterSummary = {}, options = {}) => {
@@ -471,7 +655,7 @@ export const exportStatsReportToPdf = (statsData, filterSummary = {}, options = 
   const startY = addPdfHeader(
     doc,
     options.title || 'SALES SUMMARY & ANALYTICS',
-    'Business activity report - Shoe Box',
+    'Business activity report - Měilì',
     filterSummary
   )
 
@@ -590,6 +774,7 @@ export const exportStatsReportToPdf = (statsData, filterSummary = {}, options = 
       const itemsSummary = Array.isArray(o.items)
         ? o.items.map((i) => `${i.name} (x${i.quantity || 1})`).join(', ')
         : '-'
+      const advanceVal = Number(o.advanceAmount) || 0
 
       return [
         idx + 1,
@@ -597,15 +782,16 @@ export const exportStatsReportToPdf = (statsData, filterSummary = {}, options = 
         formatDateOnly(o.date),
         customer,
         city,
-        itemsCount > 1 ? `${itemsCount} items (${itemsSummary.slice(0, 24)}...)` : itemsSummary.slice(0, 28),
-        `${o.amount || 0} TND`,
+        itemsCount > 1 ? `${itemsCount} items (${itemsSummary.slice(0, 18)}...)` : itemsSummary.slice(0, 20),
+        `${(Number(o.amount) || 0).toFixed(2)} TND`,
+        advanceVal > 0 ? `${advanceVal.toFixed(2)} TND` : '0.00 TND',
         o.status || 'Pending',
       ]
     })
 
     autoTable(doc, {
       startY: page2Y + 4,
-      head: [['#', 'Ref', 'Date', 'Customer', 'City', 'Items', 'Amount', 'Status']],
+      head: [['#', 'Ref', 'Date', 'Customer', 'City', 'Items', 'Total', 'Avance', 'Status']],
       body: ordersTableRows,
       theme: 'grid',
       headStyles: {
@@ -618,19 +804,20 @@ export const exportStatsReportToPdf = (statsData, filterSummary = {}, options = 
       columnStyles: {
         0: { halign: 'center', cellWidth: 8 },
         1: { halign: 'center', cellWidth: 16, fontStyle: 'bold' },
-        2: { halign: 'center', cellWidth: 20 },
-        3: { cellWidth: 32 },
-        4: { cellWidth: 24 },
-        5: { cellWidth: 48 },
+        2: { halign: 'center', cellWidth: 18 },
+        3: { cellWidth: 28 },
+        4: { cellWidth: 20 },
+        5: { cellWidth: 38 },
         6: { halign: 'right', fontStyle: 'bold', cellWidth: 18 },
-        7: { halign: 'center', cellWidth: 24 },
+        7: { halign: 'right', fontStyle: 'bold', cellWidth: 18, textColor: [180, 83, 9] },
+        8: { halign: 'center', cellWidth: 18 },
       },
     })
   }
 
   addPdfFooter(doc)
   const dateStr = new Date().toISOString().slice(0, 10)
-  const filename = options.filename || `Shoe Box_Stats_Summary_${dateStr}.pdf`
+  const filename = options.filename || `Meili_Stats_Summary_${dateStr}.pdf`
 
   if (options.mode === 'print') {
     doc.autoPrint()

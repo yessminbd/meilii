@@ -1,92 +1,47 @@
 import { useLang } from "../context/LangContext";
 
-const brands = [
-  {
-    name: 'Adidas',
-    color: '#0051BA',
-    svg: (
-      <svg viewBox="0 0 120 60" fill="currentColor" className="h-8 w-auto">
-        <path d="M60 8L20 52h80L60 8zm0 10.5L89.5 46H30.5L60 18.5z" />
-        <text x="60" y="58" textAnchor="middle" fontSize="11" fontWeight="900" fontFamily="sans-serif" letterSpacing="3">ADIDAS</text>
-      </svg>
-    ),
-  },
-  {
-  name: 'Nike',
-  color: '#000000',
-  svg: (
-    <svg viewBox="0 0 120 52" fill="currentColor" className="h-8 w-auto">
-      <path d="M116 6 C90 22 55 38 36 46 C24 51 12 46 4 34 C14 38 26 38 40 33 C62 25 92 14 116 6Z" />
-    </svg>
-  ),
-},
-  {
-    name: 'Puma',
-    color: '#000000',
-    svg: (
-      <svg viewBox="0 0 120 50" fill="currentColor" className="h-8 w-auto">
-        <text x="60" y="36" textAnchor="middle" fontSize="28" fontWeight="900" fontFamily="sans-serif" letterSpacing="2">PUMA</text>
-        <path d="M105 8 C114 14, 116 26, 108 32 L100 28 C106 24, 106 14, 98 12Z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'New Balance',
-    color: '#E4002B',
-    svg: (
-      <svg viewBox="0 0 120 50" fill="currentColor" className="h-8 w-auto">
-        <text x="60" y="22" textAnchor="middle" fontSize="11" fontWeight="700" fontFamily="sans-serif" letterSpacing="1">NEW BALANCE</text>
-        <text x="60" y="42" textAnchor="middle" fontSize="30" fontWeight="900" fontFamily="sans-serif">NB</text>
-      </svg>
-    ),
-  },
-  {
-    name: 'Reebok',
-    color: '#E4002B',
-    svg: (
-      <svg viewBox="0 0 120 50" fill="currentColor" className="h-8 w-auto">
-        <text x="60" y="36" textAnchor="middle" fontSize="22" fontWeight="900" fontFamily="sans-serif" letterSpacing="3">REEBOK</text>
-      </svg>
-    ),
-  },
-  {
-    name: 'Converse',
-    color: '#000000',
-    svg: (
-      <svg viewBox="0 0 120 50" fill="currentColor" className="h-8 w-auto">
-        <circle cx="60" cy="22" r="14" fill="none" stroke="currentColor" strokeWidth="3" />
-        <path d="M52 22 h16" stroke="currentColor" strokeWidth="3" />
-        <path d="M60 14 v16" stroke="currentColor" strokeWidth="3" />
-        <text x="60" y="46" textAnchor="middle" fontSize="10" fontWeight="800" fontFamily="sans-serif" letterSpacing="1">CONVERSE</text>
-      </svg>
-    ),
-  },
-  {
-    name: 'Vans',
-    color: '#C9192E',
-    svg: (
-      <svg viewBox="0 0 120 50" fill="currentColor" className="h-8 w-auto">
-        <text x="60" y="38" textAnchor="middle" fontSize="34" fontWeight="900" fontFamily="sans-serif" letterSpacing="2">VANS</text>
-      </svg>
-    ),
-  },
-  {
-    name: 'Jordan',
-    color: '#E4002B',
-    svg: (
-      <svg viewBox="0 0 50 50" fill="currentColor" className="h-8 w-auto">
-        <circle cx="25" cy="8" r="5" />
-        <path d="M25 13 L18 28 L25 24 L32 28 Z" />
-        <path d="M18 28 L12 40 M32 28 L38 40" stroke="currentColor" strokeWidth="3" fill="none" />
-        <path d="M12 40 L22 36 M38 40 L28 36" stroke="currentColor" strokeWidth="3" fill="none" />
-        <path d="M20 20 L10 26 M30 20 L40 26" stroke="currentColor" strokeWidth="2.5" fill="none" />
-      </svg>
-    ),
-  },
+/* Marques mondiales les plus populaires (celles qu'on retrouve sur Alibaba, AliExpress, Shein…).
+   Noms en texte, couleurs approximatives. */
+
+// Ligne 1 : vêtements & chaussures
+const fashionBrands = [
+  { name: "NIKE", color: "#111111", italic: true },
+  { name: "ADIDAS", color: "#111111" },
+  { name: "ZARA", color: "#111111" },
+  { name: "H&M", color: "#E50010" },
+  { name: "UNIQLO", color: "#E60012" },
+  { name: "PUMA", color: "#111111" },
+  { name: "LEVI'S", color: "#C41230" },
+  { name: "LACOSTE", color: "#006A4E" },
+  { name: "TOMMY HILFIGER", color: "#0B2A5B" },
+  { name: "CALVIN KLEIN", color: "#111111" },
+  { name: "THE NORTH FACE", color: "#D7000F" },
+  { name: "CHAMPION", color: "#0B3D91" },
+  { name: "FILA", color: "#002D62" },
+  { name: "UNDER ARMOUR", color: "#111111" },
+  { name: "MANGO", color: "#111111" },
+  { name: "NEW BALANCE", color: "#E4002B" },
 ];
 
-// Duplicate for seamless loop
-const track = [...brands, ...brands, ...brands];
+// Ligne 2 : cosmétiques & soins
+const beautyBrands = [
+  { name: "MAYBELLINE", color: "#E6007E" },
+  { name: "L'ORÉAL", color: "#111111" },
+  { name: "MAC", color: "#111111" },
+  { name: "NYX", color: "#111111" },
+  { name: "REVLON", color: "#C8102E" },
+  { name: "NIVEA", color: "#003A8F" },
+  { name: "GARNIER", color: "#2E8B3D" },
+  { name: "THE ORDINARY", color: "#111111" },
+  { name: "CERAVE", color: "#0072BC" },
+  { name: "ESSENCE", color: "#E6007E" },
+  { name: "HUDA BEAUTY", color: "#111111" },
+  { name: "FENTY BEAUTY", color: "#111111" },
+];
+
+// Triplé pour une boucle continue
+const fashionTrack = [...fashionBrands, ...fashionBrands, ...fashionBrands];
+const beautyTrack = [...beautyBrands, ...beautyBrands, ...beautyBrands];
 
 export default function Partners() {
   const { t } = useLang();
@@ -106,23 +61,23 @@ export default function Partners() {
         </p>
       </div>
 
-      {/* Marquee row 1 — left scrolling */}
+      {/* Ligne 1 — vêtements & chaussures (défile vers la gauche) */}
       <div className="relative w-full mb-4">
         <div className="pointer-events-none absolute inset-y-0 left-0 w-24 z-10 bg-gradient-to-r from-primaryLight to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-24 z-10 bg-gradient-to-l from-primaryLight to-transparent" />
         <div className="flex marquee-track">
-          {track.map((brand, i) => (
+          {fashionTrack.map((brand, i) => (
             <BrandCard key={`r1-${i}`} brand={brand} />
           ))}
         </div>
       </div>
 
-      {/* Marquee row 2 — right scrolling */}
+      {/* Ligne 2 — cosmétiques (défile vers la droite) */}
       <div className="relative w-full">
         <div className="pointer-events-none absolute inset-y-0 left-0 w-24 z-10 bg-gradient-to-r from-primaryLight to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-24 z-10 bg-gradient-to-l from-primaryLight to-transparent" />
         <div className="flex marquee-track-reverse">
-          {track.map((brand, i) => (
+          {beautyTrack.map((brand, i) => (
             <BrandCard key={`r2-${i}`} brand={brand} />
           ))}
         </div>
@@ -132,6 +87,9 @@ export default function Partners() {
 }
 
 function BrandCard({ brand }) {
+  // Taille du texte adaptée à la longueur du nom
+  const fontSize = Math.min(28, 104 / (brand.name.length * 0.68));
+
   return (
     <div
       className="
@@ -146,9 +104,20 @@ function BrandCard({ brand }) {
       "
       style={{ color: brand.color }}
     >
-      <div className="w-24 flex items-center justify-center">
-        {brand.svg}
-      </div>
+      <svg viewBox="0 0 120 50" fill="currentColor" className="h-10 w-28">
+        <text
+          x="60"
+          y="32"
+          textAnchor="middle"
+          fontSize={fontSize}
+          fontWeight="900"
+          fontStyle={brand.italic ? "italic" : "normal"}
+          fontFamily="sans-serif"
+          letterSpacing="1"
+        >
+          {brand.name}
+        </text>
+      </svg>
     </div>
   );
 }

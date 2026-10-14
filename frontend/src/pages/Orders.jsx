@@ -103,9 +103,26 @@ function OrderCard({ order, t, lang, isOpen, onToggle }) {
 
       {isOpen && (
         <div className="border-t border-gray-100 px-4 py-3 space-y-3 bg-gray-50/30 animate-[fadeDown_0.2s_ease-out]">
-          <div className="flex justify-between text-xs text-gray-500 font-medium">
+          <div className="flex justify-between items-center text-xs text-gray-500 font-medium flex-wrap gap-2">
             <span>📅 {date}</span>
             <span>{order.paymentMethod === 'cod' ? t.cashOnDelivery : order.paymentMethod} · {order.payment ? `✅ ${t.paidBadge}` : `⏳ ${t.pendingBadge}`}</span>
+          </div>
+
+          {/* Advance information for client */}
+          <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/80 text-xs">
+            <div className="flex justify-between items-center font-bold">
+              <span className="text-amber-800">
+                {order.advancePaid ? "✅ Avance validée par l'administrateur" : "⏳ En attente du versement de l'avance"}
+              </span>
+              <span className="text-amber-900 font-black">
+                {order.advanceAmount || 0} DT
+              </span>
+            </div>
+            {order.advancePaid && (
+              <p className="text-[11px] text-gray-600 mt-1 font-medium">
+                Reste à payer à la livraison : <span className="font-bold text-primary">{order.remainingAmount !== undefined ? order.remainingAmount : Math.max(0, (order.amount || 0) - (order.advanceAmount || 0))} DT</span>
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">

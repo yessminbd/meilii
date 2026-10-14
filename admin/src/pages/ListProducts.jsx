@@ -51,8 +51,7 @@ const normalizeCategories = (cat) => {
     if (!item) return
     const str = String(item).trim()
     if (!str) return
-    const std = CATEGORIES.find((c) => c.toLowerCase() === str.toLowerCase())
-    const canonical = std || (str.charAt(0).toUpperCase() + str.slice(1))
+    const canonical = str.charAt(0).toUpperCase() + str.slice(1)
     const key = canonical.toLowerCase()
     if (!uniqueMap.has(key)) {
       uniqueMap.set(key, canonical)
@@ -363,7 +362,7 @@ const ListProducts = ({ token, globalSearch }) => {
                 title="Select all"
               />
             </div>
-            {['Image', 'Product', 'Category', 'Brand', 'Price', 'Actions'].map((h) => (
+            {['Image', 'Product', 'Category', 'Sub-Category', 'Price', 'Actions'].map((h) => (
               <span key={h} className="text-[0.65rem] font-bold uppercase tracking-wider text-gray-500">
                 {h}
               </span>

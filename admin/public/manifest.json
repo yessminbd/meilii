@@ -1,11 +1,14 @@
 {
-  "name": "Shoe Box",
-  "short_name": "SW",
+  "name": "Měilì",
+  "short_name": "Měilì",
+  "description": "Měilì 美丽",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff2d6f",
   "icons": [
-  { "src": "/favicon-sw-180.png", "sizes": "180x180", "type": "image/png" },
-  { "src": "/favicon-sw-512.png", "sizes": "512x512", "type": "image/png" }
-],
-  "theme_color": "#242426",
-  "background_color": "#FFFFFF",
-  "display": "standalone"
+    { "src": "/favicon-sw.png", "sizes": "256x256", "type": "image/png" },
+    { "src": "/favicon-sw-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/favicon-sw-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
 }

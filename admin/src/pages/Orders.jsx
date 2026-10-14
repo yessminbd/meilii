@@ -33,7 +33,7 @@ import { BACKEND_URL } from '../components/constants'
 /* ---------- Status Configuration ---------- */
 const STATUS_CONFIG = {
   'Order Placed': {
-    label: 'Order Placed',
+    label: 'Awaiting Advance',
     bg: 'bg-amber-500/10',
     text: 'text-amber-600',
     border: 'border-amber-500/20',
@@ -101,7 +101,7 @@ const getStatusConfig = (status) => {
 }
 
 /* ---------- Order Details Modal ---------- */
-const OrderModal = ({ order, onClose, onUpdateStatus }) => {
+const OrderModal = ({ order, onClose, onUpdateStatus, onUpdateAdvance }) => {
   useEffect(() => {
     const handleKey = (e) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', handleKey)
@@ -289,8 +289,63 @@ const OrderModal = ({ order, onClose, onUpdateStatus }) => {
               {order.payment ? 'Paid' : 'Unpaid / On Delivery'}
             </span>
           </div>
+          {/* Advance / Down Payment Management Section */}
+          <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black uppercase text-amber-800 flex items-center gap-1.5">
+                <Wallet size={14} className="text-amber-600" /> Advance Management
+              </span>
+              <span className={`text-[0.65rem] font-bold px-2 py-0.5 rounded-full ${
+                order.advancePaid ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'
+              }`}>
+                {order.advancePaid ? 'Advance Received' : 'Awaiting Advance'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="bg-white p-2 rounded-xl border border-amber-100">
+                <p className="text-[0.68rem] text-gray-500 font-medium">Advance Paid:</p>
+                <p className="text-sm font-black text-amber-700 mt-0.5">{order.advanceAmount || 0} TND</p>
+              </div>
+              <div className="bg-white p-2 rounded-xl border border-amber-100">
+                <p className="text-[0.68rem] text-gray-500 font-medium">Due upon delivery:</p>
+                <p className="text-sm font-black text-gray-800 mt-0.5">
+                  {order.remainingAmount !== undefined ? order.remainingAmount : Math.max(0, (order.amount || 0) - (order.advanceAmount || 0))} TND
+                </p>
+              </div>
+            </div>
+
+            {/* Quick advance form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                const val = e.target.advanceInput.value
+                if (onUpdateAdvance) {
+                  onUpdateAdvance(order._id, val, true)
+                }
+              }}
+              className="flex items-center gap-2 pt-1"
+            >
+              <input
+                name="advanceInput"
+                type="number"
+                step="any"
+                min="0"
+                defaultValue={order.advanceAmount || ''}
+                placeholder="Advance amount (TND)"
+                className="flex-1 bg-white border border-amber-200 rounded-xl px-3 py-1.5 text-xs font-bold text-gray-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+              <button
+                type="submit"
+                className="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1"
+              >
+                <Check size={13} /> Confirm Advance
+              </button>
+            </form>
+          </div>
+
           <div className="flex justify-between items-baseline pt-2.5 border-t border-black/5">
-            <span className="font-bold text-[#1f1f23]">Total</span>
+            <span className="font-bold text-[#1f1f23]">Total Order</span>
             <span className="text-xl font-black text-[#1f1f23] tracking-tight">{order.amount} TND</span>
           </div>
         </div>
@@ -367,6 +422,29 @@ const Orders = ({ token, globalSearch }) => {
       toast.success(`Order updated to "${status}".`)
     } catch {
       toast.error('Error updating order status.')
+    }
+  }
+
+  const updateAdvance = async (orderId, advanceAmount, advancePaid = true) => {
+    try {
+      const res = await axios.post(
+        `${BACKEND_URL}/api/order/advance`,
+        { orderId, advanceAmount, advancePaid },
+        { headers: { token } }
+      )
+      if (res.data.success) {
+        setOrders((prev) =>
+          prev.map((o) => (o._id === orderId ? { ...o, ...res.data.order } : o))
+        )
+        if (selectedOrder && selectedOrder._id === orderId) {
+          setSelectedOrder((prev) => ({ ...prev, ...res.data.order }))
+        }
+        toast.success("Advance recorded and order confirmed!")
+      } else {
+        toast.error(res.data.message)
+      }
+    } catch {
+      toast.error("Error updating advance payment.")
     }
   }
 
@@ -850,12 +928,25 @@ const Orders = ({ token, globalSearch }) => {
 
                   {/* Buttons */}
                   <div className="flex items-center gap-2 flex-wrap">
+                    {/* Advance badge info */}
+                    <div className="text-right mr-1">
+                      {order.advancePaid ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+                          <Check size={12} /> Advance: {order.advanceAmount} DT
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200">
+                          <Clock size={12} /> Awaiting Advance
+                        </span>
+                      )}
+                    </div>
+
                     <button
                       type="button"
                       onClick={() => setSelectedOrder(order)}
                       className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                     >
-                      View Details
+                      Details / Advance
                     </button>
 
                     {sc.next && (
@@ -882,6 +973,7 @@ const Orders = ({ token, globalSearch }) => {
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
           onUpdateStatus={updateStatus}
+          onUpdateAdvance={updateAdvance}
         />
       )}
 
@@ -892,7 +984,7 @@ const Orders = ({ token, globalSearch }) => {
             {/* Header */}
             <div className="flex items-start justify-between pb-3 border-b border-gray-200">
               <div>
-                <h1 className="text-xl font-black tracking-tight text-gray-900">SHOE BOX</h1>
+                <h1 className="text-xl font-black tracking-tight text-gray-900">MĚILÌ</h1>
                 <p className="text-[11px] text-gray-500 font-semibold">Official Order Receipt</p>
                 <div className="mt-1 flex items-center gap-2">
                   <span className="font-mono text-xs font-bold text-gray-600">
@@ -978,7 +1070,7 @@ const Orders = ({ token, globalSearch }) => {
 
             {/* Footer */}
             <div className="mt-4 pt-2 border-t border-dashed border-gray-300 text-center text-[10px] text-gray-400 font-medium">
-              Thank you for shopping with Shoe Box!
+              Thank you for shopping with Měilì!
             </div>
           </div>
         </div>

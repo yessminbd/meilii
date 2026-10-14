@@ -23,12 +23,16 @@ import {
   Eye,
   X,
   FileText,
+  Wallet,
 } from 'lucide-react'
 
 import { BACKEND_URL } from '../components/constants'
 import {
   exportStatsReportToPdf,
   exportStatsReportToExcel,
+  exportOrdersToPdf,
+  exportAdvancesReportToPdf,
+  calculateOrderOriginalPrice,
   formatDate,
   formatDateOnly,
 } from '../utils/exportUtils'
@@ -520,7 +524,7 @@ export default function Stats({ token }) {
         title: pdfCustomTitle || 'SALES SUMMARY & ANALYTICS',
         includeOrdersList: pdfIncludeOrders,
         orders: filteredOrders,
-        filename: `Shoe Box_Stats_${periodLabel}_${dateStr}.pdf`,
+        filename: `Meili_Stats_${periodLabel}_${dateStr}.pdf`,
       })
       setShowPrintModal(false)
       toast.success('PDF report downloaded successfully')

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Truck, ShieldCheck, BadgePercent, CheckCircle2 } from "lucide-react";
+import { Plane, Wallet, Truck, CheckCircle2 } from "lucide-react";
 import { useLang } from "../context/LangContext";
 
 /* Apparition au scroll (une seule fois) */
@@ -61,39 +61,40 @@ export default function Features() {
   const { t } = useLang();
   const [sectionRef, inView] = useInView(0.15);
 
+  /* 3 étapes : import de Chine → avance → appel à l'arrivage + envoi */
   const features = [
+    {
+      icon: Plane,
+      iconAnim: "feat-drive",
+      title: t.importTitle,
+      subtitle: t.importSub,
+      badge: t.importBadge,
+      dotColor: "bg-blue-500",
+      description: t.importDesc,
+      points: [t.importP1, t.importP2, t.importP3],
+      footerNote: t.importNote,
+    },
+    {
+      icon: Wallet,
+      iconAnim: "feat-shield",
+      title: t.advanceTitle,
+      subtitle: t.advanceSub,
+      badge: t.advanceBadge,
+      dotColor: "bg-tertiary",
+      description: t.advanceDesc,
+      points: [t.advanceP1, t.advanceP2, t.advanceP3],
+      footerNote: t.advanceNote,
+    },
     {
       icon: Truck,
       iconAnim: "feat-drive",
-      title: t.fastDeliveryTitle,
-      subtitle: t.fastDeliverySub,
-      badge: t.fastDeliveryBadge,
+      title: t.arrivalTitle,
+      subtitle: t.arrivalSub,
+      badge: t.arrivalBadge,
       dotColor: "bg-emerald-500",
-      description: t.fastDeliveryDesc,
-      points: [t.fastDeliveryP1, t.fastDeliveryP2, t.fastDeliveryP3],
-      footerNote: t.fastDeliveryNote,
-    },
-    {
-      icon: ShieldCheck,
-      iconAnim: "feat-shield",
-      title: t.highQualityTitle,
-      subtitle: t.highQualitySub,
-      badge: t.highQualityBadge,
-      dotColor: "bg-blue-500",
-      description: t.highQualityDesc,
-      points: [t.highQualityP1, t.highQualityP2, t.highQualityP3],
-      footerNote: t.highQualityNote,
-    },
-    {
-      icon: BadgePercent,
-      iconAnim: "feat-spin",
-      title: t.bestPriceTitle,
-      subtitle: t.bestPriceSub,
-      badge: t.bestPriceBadge,
-      dotColor: "bg-tertiary",
-      description: t.bestPriceDesc,
-      points: [t.bestPriceP1, t.bestPriceP2, t.bestPriceP3],
-      footerNote: t.bestPriceNote,
+      description: t.arrivalDesc,
+      points: [t.arrivalP1, t.arrivalP2, t.arrivalP3],
+      footerNote: t.arrivalNote,
     },
   ];
 
@@ -215,8 +216,8 @@ export default function Features() {
                   <p className="text-xs font-bold uppercase tracking-wider text-tertiary mb-3">{item.subtitle}</p>
                   <p className="text-sm text-gray-50 leading-relaxed mb-6">{item.description}</p>
 
-                  {/* Route animée (livraison uniquement) */}
-                  {i === 0 && (
+                  {/* Route animée (étape livraison uniquement) */}
+                  {i === 2 && (
                     <div aria-hidden className="feat-road h-0.5 w-full mb-5 opacity-40 rounded" />
                   )}
 
@@ -240,7 +241,7 @@ export default function Features() {
                   <span>{item.footerNote}</span>
                   <span className="text-tertiary font-bold inline-flex items-center gap-1.5 transition-transform group-hover:translate-x-1">
                     <span className={`w-1.5 h-1.5 rounded-full ${item.dotColor}`} />
-                    Active
+                    {`0${i + 1}`}
                   </span>
                   {/* Barre qui se remplit au survol */}
                   <span className="feat-bar absolute -bottom-8 left-0 right-0 h-1 bg-tertiary rounded-full" />

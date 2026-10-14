@@ -6,7 +6,7 @@ const addProduct = async (req, res) => {
     try {
 
         // Récupèrer les champs envoyés 
-        const { name, description, price, category, subCategory, sizes, colors, popular } = req.body
+        const { name, description, price, originalPrice, pattern, category, subCategory, sizes, sizeType, colors, popular } = req.body
 
         let parsedCategory = []
         try {
@@ -51,10 +51,13 @@ const addProduct = async (req, res) => {
             name,
             description,
             price: Number(price),
+            originalPrice: originalPrice ? Number(originalPrice) : 0,
+            pattern: pattern || '',
             category: parsedCategory,
             subCategory,
             popular: popular === 'true' || popular === true,
             sizes: parsedSizes,
+            sizeType: sizeType || '',
             colors: parsedColors,
             image: imagesUrl,
             date: Date.now()
@@ -124,7 +127,7 @@ const singleProduct = async (req, res) => {
 // Update a product
 const updateProduct = async (req, res) => {
     try {
-        const { id, name, description, price, category, subCategory, sizes, colors, popular, existingImages } = req.body
+        const { id, name, description, price, originalPrice, pattern, category, subCategory, sizes, sizeType, colors, popular, existingImages } = req.body
 
         // Parse category
         let parsedCategory = undefined
@@ -203,10 +206,13 @@ const updateProduct = async (req, res) => {
         if (name !== undefined) updateFields.name = name
         if (description !== undefined) updateFields.description = description
         if (price !== undefined) updateFields.price = Number(price)
+        if (originalPrice !== undefined) updateFields.originalPrice = Number(originalPrice)
+        if (pattern !== undefined) updateFields.pattern = pattern
         if (parsedCategory !== undefined) updateFields.category = parsedCategory
         if (subCategory !== undefined) updateFields.subCategory = subCategory
         if (popular !== undefined) updateFields.popular = popular === 'true' || popular === true
         if (sizes !== undefined) updateFields.sizes = parsedSizes
+        if (sizeType !== undefined) updateFields.sizeType = sizeType
         if (colors !== undefined) updateFields.colors = parsedColors
         if (finalImages && finalImages.length > 0) updateFields.image = finalImages
 

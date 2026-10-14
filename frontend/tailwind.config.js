@@ -10,7 +10,7 @@ export default {
                 primary: "#242426",
                 primaryLight: "#FFFFFF",
                 secondary: "#2E2F31",
-                tertiary: "#e04c68",
+                tertiary: "#E80B4A",
                 gray: {
                     10: "#EEEEEE",
                     20: "#A2A2A2",

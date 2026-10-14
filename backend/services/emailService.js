@@ -69,12 +69,12 @@ export const sendOrderConfirmationEmail = async ({ order, userEmail, userName })
     <html>
     <head>
       <meta charset="utf-8">
-      <title>Confirmation de commande - Shoe Box</title>
+      <title>Confirmation de commande - Měilì</title>
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f6f6f6; margin: 0; padding: 20px;">
       <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #eeeeee;">
         <div style="background-color: #242426; padding: 30px 20px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 1px;">SHOE BOX</h1>
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 1px;">MĚILÌ</h1>
           <p style="color: #E63946; margin: 6px 0 0 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;">Confirmation de commande</p>
         </div>
 
@@ -116,7 +116,7 @@ export const sendOrderConfirmationEmail = async ({ order, userEmail, userName })
         </div>
 
         <div style="background-color: #f0f0f0; padding: 16px 20px; text-align: center; border-top: 1px solid #eeeeee;">
-          <p style="margin: 0; color: #7B7B7B; font-size: 12px;">© ${new Date().getFullYear()} Shoe Box. Tous droits réservés.</p>
+          <p style="margin: 0; color: #7B7B7B; font-size: 12px;">© ${new Date().getFullYear()} Měilì. Tous droits réservés.</p>
         </div>
       </div>
     </body>
@@ -125,9 +125,9 @@ export const sendOrderConfirmationEmail = async ({ order, userEmail, userName })
 
     if (clientEmail) {
       await transporter.sendMail({
-        from: `"Shoe Box" <${process.env.SMTP_USER || process.env.EMAIL_USER}>`,
+        from: `"Měilì" <${process.env.SMTP_USER || process.env.EMAIL_USER}>`,
         to: clientEmail,
-        subject: `Confirmation de votre commande #${orderId} - Shoe Box`,
+        subject: `Confirmation de votre commande #${orderId} - Měilì`,
         html: htmlContent,
       });
       console.log(`[EmailService] Email de confirmation envoyé avec succès à ${clientEmail}`);
@@ -136,7 +136,7 @@ export const sendOrderConfirmationEmail = async ({ order, userEmail, userName })
     const adminEmail = process.env.ADMIN_EMAIL;
     if (adminEmail && adminEmail !== clientEmail) {
       await transporter.sendMail({
-        from: `"Shoe Box System" <${process.env.SMTP_USER || process.env.EMAIL_USER}>`,
+        from: `"Měilì System" <${process.env.SMTP_USER || process.env.EMAIL_USER}>`,
         to: adminEmail,
         subject: `🚨 Nouvelle commande #${orderId} - ${order.amount} DT (${clientName})`,
         html: htmlContent,

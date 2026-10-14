@@ -8,6 +8,9 @@ import productRouter from "./routes/productRoute.js"
 import cartRouter from "./routes/cartRoute.js"
 import orderRouter from "./routes/orderRoute.js"
 import promoRouter from "./routes/promoRoute.js"
+import categoryRouter from "./routes/categoryRoute.js"
+import sizeTypeRouter from "./routes/sizeTypeRoute.js"
+import colorRouter from "./routes/colorRoute.js"
 // App config
 const app = express()
 const port = process.env.PORT || 4000
@@ -49,6 +52,9 @@ app.use('/api/product', productRouter)
 app.use('/api/cart', cartRouter)
 app.use('/api/order', orderRouter)
 app.use('/api/promo', promoRouter)
+app.use('/api/category', categoryRouter)
+app.use('/api/sizeType', sizeTypeRouter)
+app.use('/api/color', colorRouter)
 
 
 app.get('/', (req, res) => {

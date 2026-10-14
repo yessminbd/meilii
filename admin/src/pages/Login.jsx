@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
-import sneaker1 from '../assets/slide3.jpg'
+import sneaker1 from '../assets/login-square.svg'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
 
@@ -48,7 +48,7 @@ const Login = ({ setToken }) => {
 
         <img
           src={sneaker1}
-          alt="Shoe Box"
+          alt="Měilì"
           className="absolute inset-0 w-full h-full object-cover opacity-60"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1f1f23] via-[#1f1f23]/40 to-transparent" />
@@ -77,7 +77,7 @@ const Login = ({ setToken }) => {
               Admin Access 🔐
             </h1>
             <p className="text-gray-600 text-sm mt-2">
-              Log in to manage Shoe Box.
+              Log in to manage Měilì.
             </p>
           </div>
 
@@ -132,11 +132,11 @@ const Login = ({ setToken }) => {
           </form>
 
           <p className="text-center text-gray-500 text-xs mt-8 font-medium">
-            © {new Date().getFullYear()} Shoe Box — All rights reserved
+            © {new Date().getFullYear()} Měilì — All rights reserved
           </p>
 
           <div className="lg:hidden mt-8 rounded-2xl overflow-hidden h-44 w-full">
-            <img src={sneaker1} alt="Shoe Box" className="w-full h-full object-cover" />
+            <img src={sneaker1} alt="Měilì" className="w-full h-full object-cover" />
           </div>
         </div>
       </div>

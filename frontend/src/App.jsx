@@ -9,7 +9,6 @@ import Login from "./pages/Login";
 import Orders from "./pages/Orders";
 import PlaceOrder from "./pages/PlaceOrder";
 import Verify from "./pages/Verify";
-import About from "./pages/About";
 import Product from "./pages/Product";
 import Profile from "./pages/Profile";
 import { ToastContainer } from 'react-toastify';
@@ -26,7 +25,6 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/features" element={<Features />} />
         <Route path="/collection" element={<Collection />} />
-        <Route path="/about" element={<About />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/login" element={<Login />} />
         <Route path="/orders" element={<Orders />} />

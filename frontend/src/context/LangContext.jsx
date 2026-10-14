@@ -1,596 +1,130 @@
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
+import { translations } from "../constants/translations";
+import {
+  getActiveLang,
+  setActiveLang,
+  toggleActiveLang,
+  onLanguageChange,
+  translateText,
+  getCachedTranslation,
+} from "../services/translateService";
+
+export { translations };
 
 export const LangContext = createContext();
 
-export const translations = {
-  en: {
-
-    // English
-
-    subject: "Subject",
-    subjectPlaceholder: "What is this about?",
-    message: "Message",
-    messagePlaceholder: "Write your message here...",
-    sendMessage: "Send message",
-    sending: "Sending…",
-    messageSent: "Message sent! We'll get back to you soon.",
-    messageError: "Something went wrong. Please try again.",
-    fieldRequired: "This field is required.",
-    invalidEmail: "Please enter a valid email address.",
-    messageTooShort: "Your message is too short (10 characters minimum).",
-    noProductsTitle: "No products available",
-    noProductsDesc: "We couldn't find any product matching your filters. Try changing your search or resetting the filters.",
-    resetFilters: "Reset filters",
-    // Header
-    searchPlaceholder: "Search sneakers...",
-    collection: "Collection",
-    cart: "Cart",
-    myProfile: "My Profile",
-    logout: "Logout",
-    login: "Log In",
-    switchLang: "Passer en Français",
-
-    // Hero
-    heroBadge: "New Season 2026",
-    heroTitle1: "Step Into",
-    heroTitle2: "Your World.",
-    heroDesc: "Discover the finest selection of premium sneakers in Tunisia — where street style meets luxury. Limited drops, iconic silhouettes, curated for those who dare to stand out.",
-    newCollectionBtn: "New Collection",
-    joinUsBtn: "Join Us",
-
-    // Features
-    guaranteeBadge: "The Shoe Box Guarantee",
-    whyChooseUs: "Why Sneakerheads Choose Us",
-    whyChooseUsSub: "Premium authentic sneakers with fast delivery and the best rates in Tunisia.",
-    fastDeliveryTitle: "Fast Delivery",
-    fastDeliverySub: "Across Tunisia",
-    fastDeliveryBadge: "24-48h Express",
-    fastDeliveryDesc: "Fast, reliable shipping right to your doorstep anywhere in Tunisia.",
-    fastDeliveryP1: "Delivered to all 24 governorates",
-    fastDeliveryP2: "Real-time SMS & phone tracking",
-    fastDeliveryP3: "Pay on delivery (Cash on Delivery)",
-    fastDeliveryNote: "Dispatches daily from Tunis",
-
-    highQualityTitle: "High Quality",
-    highQualitySub: "100% Authentic",
-    highQualityBadge: "Guaranteed Original",
-    highQualityDesc: "Only genuine sneakers sourced directly from verified international partners.",
-    highQualityP1: "10-point physical inspection",
-    highQualityP2: "Original box, SKU & factory laces",
-    highQualityP3: "Premium replicas, unbeatable prices",
-    highQualityNote: "Certified authenticity check",
-
-    bestPriceTitle: "Best Price",
-    bestPriceSub: "True Local Rates",
-    bestPriceBadge: "No Hidden Fees",
-    bestPriceDesc: "Transparent pricing in Tunisian Dinar with no unexpected customs markups.",
-    bestPriceP1: "Direct-to-consumer pricing in TND",
-    bestPriceP2: "No international customs surprises",
-    bestPriceP3: "Exclusive member drops & discounts",
-    bestPriceNote: "Price match assurance",
-
-    // Partners
-    trustedPartners: "Trusted Partners",
-    bestBrands: "The World's Best Brands",
-    bestBrandsSub: "We carry only authentic gear from the top names in sneaker culture.",
-
-    // Popular
-    trendingTitle: "Trending & Popular",
-
-    // Collection
-    filters: "Filters",
-    brands: "Brands",
-    gender: "Gender",
-    men: "Men",
-    women: "Women",
-    kids: "Kids",
-    price: "Price",
-    allPrices: "All Prices",
-    under100: "Under 100 DT",
-    between100and200: "100 DT - 200 DT",
-    over200: "Over 200 DT",
-    allCollection: "All Collection",
-    sortRelevant: "Relevant",
-    sortLowHigh: "Price: Low to High",
-    sortHighLow: "Price: High to Low",
-
-    // Product
-    selectSize: "Select Size",
-    selectColor: "Select Color",
-    quantity: "Quantity",
-    addToCart: "Add to Cart",
-    buyNow: "Buy Now",
-    outOfStock: "Out of Stock",
-    addedToCart: "Added to cart!",
-    selectSizePrompt: "Please select a size first.",
-    tabDescription: "Description",
-    tabSpecs: "Specifications",
-    tabShipping: "Delivery & Returns",
-    authenticGuarantee: "100% Authentic Guaranteed",
-    expressShippingNote: "Express shipping in 24-48 hours",
-    easyReturnsNote: "Hassle-free exchange policy",
-    relatedProductsTitle: "You May Also Like",
-    sizeGuide: "Size Guide",
-    brandLabel: "Brand",
-    categoryLabel: "Category",
-    colorLabel: "Color",
-    sizeLabel: "Size",
-
-    // Cart
-    itemsInCart: (n) => `${n} item${n !== 1 ? "s" : ""} in your cart`,
-    continueShopping: "Continue shopping",
-    cartEmpty: "Your cart is empty",
-    cartEmptyDesc: "Looks like you haven't picked your next pair yet.",
-    discoverCollection: "Discover the collection",
-    summary: "Summary",
-    subtotal: "Subtotal",
-    shippingFee: "Shipping fee",
-    total: "Total",
-    proceedToCheckout: "Proceed to Checkout",
-    deliveryAcrossTunisia: "Delivery across Tunisia",
-
-    // Checkout (PlaceOrder)
-    confirmOrder: "Confirm Order",
-    reviewBeforeConfirm: "Review your details before confirming",
-    close: "Close",
-    delivery: "Delivery",
-    items: "Items",
-    recap: "Summary",
-    paymentMethod: "Payment",
-    promoDiscount: "Discount",
-    freeShipping: "Free",
-    cashOnDelivery: "Cash on Delivery",
-    stripe: "Stripe",
-    confirmNote: "By confirming, you agree that your order will be processed and delivered to the specified address.",
-    modify: "Edit",
-    confirmBtn: "Confirm Order",
-    processing: "Processing…",
-    backToCart: "Back to cart",
-    placeOrderTitle: "Complete your order",
-    emptyCartTitle: "Empty cart",
-    emptyCartDesc: "Add items before placing an order.",
-    viewCollection: "View collection",
-    personalInfo: "Personal Information",
-    firstName: "First Name",
-    lastName: "Last Name",
-    email: "Email",
-    phone: "Phone",
-    shippingAddress: "Shipping Address",
-    street: "Street / Address",
-    city: "City",
-    governorate: "Governorate",
-    postalCode: "Postal Code",
-    country: "Country",
-    payment: "Payment",
-    cashOnDeliveryDesc: "Pay in cash upon delivery",
-    stripeDesc: "Secure credit card payment",
-    promoCode: "Promo code",
-    promoPlaceholder: "e.g. SUMMER20",
-    applyPromo: "Apply",
-    placeOrderBtn: "Place Order",
-    deliveryTunisia: "Delivery across Tunisia",
-    securePayment: "Secure payment",
-    processingTime: "Processed within 24h",
-    loginForPromo: "Please log in to use a promo code.",
-    verifyError: "Verification error. Try again.",
-    cartEmptyError: "Your cart is empty!",
-    fillAllFields: "Please fill in all required fields.",
-    invalidPhone: "Please enter a valid 8-digit phone number.",
-    invalidZipCode: "Postal code must contain 4 digits.",
-    orderSuccess: "Order placed successfully! 🎉",
-    orderError: "Error placing order.",
-    stripeError: "Stripe error.",
-    serverError: "An error occurred. Please try again.",
-
-    // Login
-    loginTitle: "Welcome Back 👋",
-    signupTitle: "Join Us 🔥",
-    loginSubtitle: "Log in to access your orders and wishlist.",
-    signupSubtitle: "Create an account and start shopping the latest drops.",
-    fullName: "Full Name",
-    namePlaceholder: "Enter your name",
-    emailPlaceholder: "Enter your email address",
-    passwordLabel: "Password",
-    passwordPlaceholder: "Enter your password",
-    passwordMinLength: "Confirm Password",
-    noAccount: "Don't have an account?",
-    hasAccount: "Already have an account?",
-    signUp: "Sign Up",
-    signIn: "Log In",
-    forgotPassword: "Forgot password?",
-    orContinue: "or",
-    accountCreatedSuccess: "Account created successfully! Please log in.",
-    welcomeAdmin: "Welcome Admin! Redirecting...",
-    welcomeBack: "Welcome back!",
-    popular: 'Popular',
-    details: 'Details',
-    // Profile
-    profileTitle: "My Profile",
-    ordersTitle: "My Orders",
-    totalOrdersLabel: "Orders",
-    inProgressLabel: "In Progress",
-    deliveredLabel: "Delivered",
-    noOrdersTitle: "No orders yet",
-    noOrdersDesc: "Your orders will appear here once placed",
-    statusPending: "Pending",
-    statusPacking: "Packing",
-    statusShipped: "Shipped",
-    statusDelivered: "Delivered",
-    statusCancelled: "Cancelled",
-    paidBadge: "Paid",
-    pendingBadge: "Pending",
-    autoRefreshNote: "Auto-refreshing every 30 seconds",
-    refreshTitle: "Refresh",
-  sgSubtitle: "Find your perfect fit. Choose a size system or enter your foot length.",
-sgSystemLabel: "Show sizes in",
-sgFootLength: "Foot length (cm)",
-sgFinderTitle: "Find my size",
-sgFinderDesc: "Enter your foot length and we'll find your size.",
-sgFinderPlaceholder: "e.g. 26.5",
-sgYourSize: "Your recommended size",
-sgBelowRange: "Your foot is smaller than this chart. This is the smallest size listed.",
-sgAboveRange: "Your foot is larger than this chart. This is the largest size listed.",
-sgHowTitle: "How to measure your foot",
-sgStep1: "Place a sheet of paper against a wall and stand on it with your heel touching the wall.",
-sgStep2: "Mark the tip of your longest toe on the paper.",
-sgStep3: "Measure the distance from the wall to the mark, in centimeters.",
-sgStep4: "Repeat with the other foot and use the larger measurement.",
-sgTip1: "Measure in the evening, when your feet are slightly larger.",
-sgTip2: "Wear the socks you'll normally use with your sneakers.",
-sgTip3: "Between two sizes, choose the larger one.",
-sgNote: "Sizes may vary slightly between brands. This chart is a general guide.",
-sgTableHint: "Tap a row to highlight it.",
-    // About
-    aboutHeroBadge: "Our story",
-    aboutHeroTitle: "Shoe Box",
-    aboutHeroDesc: "A passionate sneaker community, united by one goal: making the best pairs accessible to everyone.",
-    statFollowers: "Instagram followers",
-    statModels: "Models available",
-    statCustomers: "Happy customers",
-    statBrands: "Partner brands",
-    ourServices: "Our services",
-    ourServicesSub: "What makes Shoe Box different",
-    service1Title: "Exclusive selection",
-    service1Desc: "The best international brands, handpicked for quality and style.",
-    service2Title: "Fast shipping",
-    service2Desc: "Quick delivery across Tunisia, with real-time order tracking.",
-    service3Title: "Guaranteed authenticity",
-    service3Desc: "Every pair is checked to guarantee 100% authenticity.",
-    service4Title: "Competitive prices",
-    service4Desc: "Exclusive deals and regular promotions on a wide selection.",
-    gotQuestion: "Got a question?",
-    gotQuestionSub: "Our team will get back to you quickly",
-
-    firstNamePlaceholder: 'Enter your first name',
-    lastNamePlaceholder: 'Enter your last name',
-    emailPlaceholder: 'Enter your email address',
-    phonePlaceholder: 'Enter your phone number',
-    streetPlaceholder: 'Street name and number',
-    cityPlaceholder: 'Enter your city',
-    governoratePlaceholder: 'Enter your governorate',
-    postalCodePlaceholder: 'Enter your postal code',
-    // Footer
-    footerSlogan: "Find your perfect fit. Walk in style",
-    shopSection: "Shop",
-    newArrivals: "New Arrivals",
-    bestSellers: "Best Sellers",
-    sale: "Sale",
-    companySection: "Company",
-    aboutUs: "About Us",
-    contact: "Contact",
-    trackOrder: "Track Order",
-    supportSection: "Support",
-    faq: "FAQ",
-    returns: "Returns",
-    shippingInfo: "Shipping Info",
-    rightsReserved: "All rights reserved.",
-    privacyPolicy: "Privacy Policy",
-    termsOfService: "Terms of Service",
-    adminPanel: "Admin Panel",
-  },
-  fr: {
-    sgSubtitle: "Trouvez votre taille idéale. Choisissez un système de pointures ou saisissez la longueur de votre pied.",
-sgSystemLabel: "Afficher les tailles en",
-sgFootLength: "Longueur du pied (cm)",
-sgFinderTitle: "Trouver ma pointure",
-sgFinderDesc: "Saisissez la longueur de votre pied et nous trouvons votre taille.",
-sgFinderPlaceholder: "Ex : 26,5",
-sgYourSize: "Votre taille recommandée",
-sgBelowRange: "Votre pied est plus petit que ce tableau. Voici la plus petite taille proposée.",
-sgAboveRange: "Votre pied est plus grand que ce tableau. Voici la plus grande taille proposée.",
-sgHowTitle: "Comment mesurer votre pied",
-sgStep1: "Posez une feuille contre un mur et placez-vous dessus, talon contre le mur.",
-sgStep2: "Marquez sur la feuille le bout de votre orteil le plus long.",
-sgStep3: "Mesurez la distance entre le mur et la marque, en centimètres.",
-sgStep4: "Recommencez avec l'autre pied et gardez la plus grande mesure.",
-sgTip1: "Mesurez en fin de journée, quand vos pieds sont légèrement plus grands.",
-sgTip2: "Portez les chaussettes que vous mettez habituellement avec vos sneakers.",
-sgTip3: "Entre deux tailles, choisissez la plus grande.",
-sgNote: "Les pointures peuvent varier légèrement selon les marques. Ce tableau est un guide général.",
-sgTableHint: "Touchez une ligne pour la surligner.",
-    subject: "Sujet",
-subjectPlaceholder: "De quoi s'agit-il ?",
-message: "Message",
-messagePlaceholder: "Écrivez votre message ici...",
-sendMessage: "Envoyer le message",
-sending: "Envoi…",
-messageSent: "Message envoyé ! Nous vous répondrons rapidement.",
-messageError: "Une erreur est survenue. Veuillez réessayer.",
-fieldRequired: "Ce champ est obligatoire.",
-invalidEmail: "Veuillez saisir une adresse e-mail valide.",
-messageTooShort: "Votre message est trop court (10 caractères minimum).",
-    // Header
-    searchPlaceholder: "Rechercher des sneakers...",
-    collection: "Collection",
-    cart: "Panier",
-    myProfile: "Mon Profil",
-    logout: "Déconnexion",
-    login: "Connexion",
-    switchLang: "Switch to English",
-
-    // Hero
-    heroBadge: "Nouvelle Saison 2026",
-    heroTitle1: "Entrez dans",
-    heroTitle2: "Votre Monde.",
-    heroDesc: "Découvrez la meilleure sélection de sneakers premium en Tunisie — où le style urbain rencontre le luxe. Drops limités, modèles iconiques, pour ceux qui osent se démarquer.",
-    newCollectionBtn: "Nouvelle Collection",
-    joinUsBtn: "Rejoignez-nous",
-
-    // Features
-    guaranteeBadge: "La Garantie Shoe Box",
-    whyChooseUs: "Pourquoi les Sneakerheads nous choisissent",
-    whyChooseUsSub: "Sneakers authentiques premium avec livraison rapide et les meilleurs tarifs en Tunisie.",
-    fastDeliveryTitle: "Livraison Rapide",
-    fastDeliverySub: "Partout en Tunisie",
-    fastDeliveryBadge: "Express 24-48h",
-    fastDeliveryDesc: "Livraison rapide et fiable directement à votre porte partout en Tunisie.",
-    fastDeliveryP1: "Livré dans les 24 gouvernorats",
-    fastDeliveryP2: "Suivi en temps réel par SMS et téléphone",
-    fastDeliveryP3: "Paiement à la livraison (Cash on Delivery)",
-    fastDeliveryNote: "Expédié chaque jour depuis Tunis",
-
-    highQualityTitle: "Haute Qualité",
-    highQualitySub: "100% Authentique",
-    highQualityBadge: "Garanti Original",
-    highQualityDesc: "Uniquement des sneakers authentiques issues directement de partenaires internationaux vérifiés.",
-    highQualityP1: "Inspection physique en 10 points",
-    highQualityP2: "Boîte originale, SKU et lacets d'origine",
-    highQualityP3: "Imitations premium, prix imbattables",
-    highQualityNote: "Contrôle d'authenticité certifié",
-
-    firstNamePlaceholder: 'Saisissez votre prénom',
-    lastNamePlaceholder: 'Saisissez votre nom',
-    emailPlaceholder: 'Saisissez votre adresse e-mail',
-    phonePlaceholder: 'Saisissez votre numéro de téléphone',
-    streetPlaceholder: 'Nom et numéro de la rue',
-    cityPlaceholder: 'Saisissez votre ville',
-    governoratePlaceholder: 'Saisissez votre gouvernorat',
-    postalCodePlaceholder: 'Saisissez votre code postal',
-
-    bestPriceTitle: "Meilleur Prix",
-    bestPriceSub: "Vrais Tarifs Locaux",
-    bestPriceBadge: "Sans Frais Cachés",
-    bestPriceDesc: "Tarification transparente en Dinar Tunisien sans surprise douanière inattendue.",
-    bestPriceP1: "Prix direct consommateur en TND",
-    bestPriceP2: "Aucune surprise de frais de douane",
-    bestPriceP3: "Drops et réductions exclusifs aux membres",
-    bestPriceNote: "Garantie du meilleur prix",
-
-    // Partners
-    trustedPartners: "Partenaires de Confiance",
-    bestBrands: "Les Meilleures Marques Mondiales",
-    bestBrandsSub: "Nous proposons uniquement des articles authentiques des plus grands noms de la culture sneaker.",
-    noProductsTitle: "Aucun produit disponible",
-    noProductsDesc: "Nous n'avons trouvé aucun produit correspondant à vos filtres. Essayez de modifier votre recherche ou de réinitialiser les filtres.",
-    resetFilters: "Réinitialiser les filtres",
-
-
-    // Popular
-    trendingTitle: "Tendances & Populaires",
-    popular: 'Populaire',
-    details: 'Détails',
-    // Collection
-    filters: "Filtres",
-    brands: "Marques",
-    gender: "Genre",
-    men: "Hommes",
-    women: "Femmes",
-    kids: "Enfants",
-    price: "Prix",
-    allPrices: "Tous les prix",
-    under100: "Moins de 100 DT",
-    between100and200: "100 DT - 200 DT",
-    over200: "Plus de 200 DT",
-    allCollection: "Toute la Collection",
-    sortRelevant: "Pertinence",
-    sortLowHigh: "Prix : Croissant",
-    sortHighLow: "Prix : Décroissant",
-
-    // Product
-    selectSize: "Choisir la taille",
-    selectColor: "Choisir la couleur",
-    quantity: "Quantité",
-    addToCart: "Ajouter au panier",
-    buyNow: "Acheter maintenant",
-    outOfStock: "Rupture de stock",
-    addedToCart: "Ajouté au panier !",
-    selectSizePrompt: "Veuillez d'abord sélectionner une taille.",
-    tabDescription: "Description",
-    tabSpecs: "Caractéristiques",
-    tabShipping: "Livraison & Retours",
-    authenticGuarantee: "Garanti 100% Authentique",
-    expressShippingNote: "Livraison express en 24-48 heures",
-    easyReturnsNote: "Politique d'échange facile",
-    relatedProductsTitle: "Vous pourriez aussi aimer",
-    sizeGuide: "Guide des tailles",
-    brandLabel: "Marque",
-    categoryLabel: "Catégorie",
-    colorLabel: "Couleur",
-    sizeLabel: "Taille",
-
-    // Cart
-    itemsInCart: (n) => `${n} article${n !== 1 ? "s" : ""} dans votre panier`,
-    continueShopping: "Continuer les achats",
-    cartEmpty: "Votre panier est vide",
-    cartEmptyDesc: "Vous n'avez pas encore choisi votre prochaine paire.",
-    discoverCollection: "Découvrir la collection",
-    summary: "Récapitulatif",
-    subtotal: "Sous-total",
-    shippingFee: "Frais de livraison",
-    total: "Total",
-    proceedToCheckout: "Passer à la caisse",
-    deliveryAcrossTunisia: "Livraison partout en Tunisie",
-
-    // Checkout (PlaceOrder)
-    confirmOrder: "Confirmer la commande",
-    reviewBeforeConfirm: "Vérifiez vos informations avant de valider",
-    close: "Fermer",
-    delivery: "Livraison",
-    items: "Articles",
-    recap: "Récapitulatif",
-    paymentMethod: "Paiement",
-    promoDiscount: "Remise",
-    freeShipping: "Gratuite",
-    cashOnDelivery: "Paiement à la livraison",
-    stripe: "Stripe",
-    confirmNote: "En confirmant, vous acceptez que votre commande soit traitée et livrée à l'adresse indiquée.",
-    modify: "Modifier",
-    confirmBtn: "Confirmer la commande",
-    processing: "Traitement…",
-    backToCart: "Retour au panier",
-    placeOrderTitle: "Finaliser la commande",
-    emptyCartTitle: "Panier vide",
-    emptyCartDesc: "Ajoutez des articles avant de passer commande.",
-    viewCollection: "Voir la collection",
-    personalInfo: "Informations personnelles",
-    firstName: "Prénom",
-    lastName: "Nom",
-    email: "Email",
-    phone: "Téléphone",
-    shippingAddress: "Adresse de livraison",
-    street: "Rue / Adresse",
-    city: "Ville",
-    governorate: "Gouvernorat",
-    postalCode: "Code postal",
-    country: "Pays",
-    payment: "Paiement",
-    cashOnDeliveryDesc: "Payez en espèces à la réception",
-    stripeDesc: "Carte bancaire sécurisée",
-    promoCode: "Code promo",
-    promoPlaceholder: "Ex: SUMMER20",
-    applyPromo: "Appliquer",
-    placeOrderBtn: "Passer la commande",
-    deliveryTunisia: "Livraison partout en Tunisie",
-    securePayment: "Paiement sécurisé",
-    processingTime: "Traitement sous 24h",
-    loginForPromo: "Veuillez vous connecter pour utiliser un code promo.",
-    verifyError: "Erreur lors de la vérification.",
-    cartEmptyError: "Votre panier est vide !",
-    fillAllFields: "Veuillez remplir tous les champs obligatoires.",
-    invalidPhone: "Le numéro de téléphone doit comporter 8 chiffres.",
-    invalidZipCode: "Le code postal doit comporter 4 chiffres.",
-    orderSuccess: "Commande passée avec succès ! 🎉",
-    orderError: "Erreur lors de la commande.",
-    stripeError: "Erreur Stripe.",
-    serverError: "Une erreur est survenue. Réessayez.",
-
-    // Login
-    loginTitle: "Bon retour 👋",
-    signupTitle: "Rejoignez-nous 🔥",
-    loginSubtitle: "Connectez-vous pour accéder à vos commandes et favoris.",
-    signupSubtitle: "Créez un compte et commencez à shopper les derniers drops.",
-    fullName: "Nom complet",
-    namePlaceholder: "Saisissez votre nom",
-    emailPlaceholder: "Saisissez votre adresse e-mail",
-    passwordLabel: "Saisissez votre mot de passe",
-    passwordPlaceholder: "••••••••",
-    passwordMinLength: "Confirmez votre mot de passe",
-    noAccount: "Pas de compte ?",
-    hasAccount: "Déjà un compte ?",
-    signUp: "S'inscrire",
-    signIn: "Se connecter",
-    forgotPassword: "Mot de passe oublié ?",
-    orContinue: "ou",
-    accountCreatedSuccess: "Compte créé avec succès ! Veuillez vous connecter.",
-    welcomeAdmin: "Bienvenue Admin ! Redirection...",
-    welcomeBack: "Bon retour !",
-
-    // Profile
-    profileTitle: "Mon Profil",
-    ordersTitle: "Mes Commandes",
-    totalOrdersLabel: "Commandes",
-    inProgressLabel: "En cours",
-    deliveredLabel: "Livrées",
-    noOrdersTitle: "Aucune commande",
-    noOrdersDesc: "Vos commandes apparaîtront ici après votre achat",
-    statusPending: "En attente",
-    statusPacking: "Préparation",
-    statusShipped: "Expédié",
-    statusDelivered: "Livré",
-    statusCancelled: "Annulé",
-    paidBadge: "Payé",
-    pendingBadge: "En attente",
-    autoRefreshNote: "Mise à jour automatique toutes les 30 secondes",
-    refreshTitle: "Rafraîchir",
-
-    // About
-    aboutHeroBadge: "Notre histoire",
-    aboutHeroTitle: "Shoe Box",
-    aboutHeroDesc: "Une communauté passionnée de sneakers, unie par un seul but : rendre les meilleures paires accessibles à tous.",
-    statFollowers: "Abonnés Instagram",
-    statModels: "Modèles disponibles",
-    statCustomers: "Clients satisfaits",
-    statBrands: "Marques partenaires",
-    ourServices: "Nos services",
-    ourServicesSub: "Ce qui rend Shoe Box unique",
-    service1Title: "Sélection exclusive",
-    service1Desc: "Les meilleures marques internationales, choisies avec soin pour leur qualité et style.",
-    service2Title: "Livraison rapide",
-    service2Desc: "Livraison rapide dans toute la Tunisie avec suivi en direct.",
-    service3Title: "Authenticité garantie",
-    service3Desc: "Chaque paire est rigoureusement vérifiée pour garantir 100% d'authenticité.",
-    service4Title: "Prix compétitifs",
-    service4Desc: "Offres exclusives et promotions régulières sur une large sélection.",
-    gotQuestion: "Une question ?",
-    gotQuestionSub: "Notre équipe vous répond rapidement",
-
-    // Footer
-    footerSlogan: "Trouvez votre paire idéale. Marchez avec style",
-    shopSection: "Boutique",
-    newArrivals: "Nouveautés",
-    bestSellers: "Meilleures ventes",
-    sale: "Promotions",
-    companySection: "Entreprise",
-    aboutUs: "À propos",
-    contact: "Contact",
-    trackOrder: "Suivre commande",
-    supportSection: "Support",
-    faq: "FAQ",
-    returns: "Retours",
-    shippingInfo: "Infos livraison",
-    rightsReserved: "Tous droits réservés.",
-    privacyPolicy: "Politique de confidentialité",
-    termsOfService: "Conditions d'utilisation",
-    adminPanel: "Panneau Admin",
-  },
-};
-
 export default function LangProvider({ children }) {
-  const [lang, setLang] = useState(() => localStorage.getItem("sw_lang") || "en");
+  const [lang, setLangState] = useState(() => getActiveLang());
+  const [, setTick] = useState(0);
 
-  const toggleLang = () => {
-    const next = lang === "en" ? "fr" : "en";
-    setLang(next);
-    localStorage.setItem("sw_lang", next);
-  };
+  useEffect(() => {
+    // S'abonner aux changements de langue émis par le service de traduction
+    const unsubscribe = onLanguageChange((newLang) => {
+      setLangState(newLang);
+    });
+    return unsubscribe;
+  }, []);
 
-  const t = translations[lang] || translations.en;
+  const triggerUpdate = useCallback(() => {
+    setTick((prev) => prev + 1);
+  }, []);
+
+  const setLang = useCallback((newLang) => {
+    setActiveLang(newLang);
+  }, []);
+
+  const toggleLang = useCallback(() => {
+    toggleActiveLang();
+  }, []);
+
+  const translate = useCallback(
+    (text, targetLang = lang) => {
+      return translateText(text, targetLang);
+    },
+    [lang]
+  );
+
+  /**
+   * Objet/Fonction "t" intelligent :
+   * 1. Utilisable comme fonction : t("Texte dynamique à traduire", "fallback")
+   * 2. Utilisable comme objet : t.collection, t.cart, t.searchPlaceholder, etc.
+   * 3. Supporte les fonctions comme t.itemsInCart(3)
+   */
+  const t = useMemo(() => {
+    const currentDict = translations[lang] || translations.fr || {};
+
+    const fn = (text, fallback = null) => {
+      if (!text || typeof text !== "string") return fallback || text || "";
+      const clean = text.trim();
+      if (!clean) return fallback || text;
+
+      // 1. Si le texte correspond exactement à une clé du dictionnaire de base
+      if (currentDict[clean]) {
+        return currentDict[clean];
+      }
+
+      // 2. Vérifier si la traduction est dans le cache dynamique
+      const cached = getCachedTranslation(clean, lang);
+      if (cached) {
+        return cached;
+      }
+
+      // 3. Déclencher la traduction dynamique via l'API gratuite en arrière-plan
+      translateText(clean, lang)
+        .then((result) => {
+          if (result && result !== clean) {
+            triggerUpdate();
+          }
+        })
+        .catch(() => {});
+
+      // En attendant la réponse de l'API, afficher le fallback ou le texte original
+      return fallback || text;
+    };
+
+    return new Proxy(fn, {
+      get(target, prop, receiver) {
+        if (
+          typeof prop === "symbol" ||
+          prop === "then" ||
+          prop === "prototype" ||
+          prop === "length" ||
+          prop === "name"
+        ) {
+          return Reflect.get(target, prop, receiver);
+        }
+
+        // Si la propriété existe dans le dictionnaire statique de base
+        if (prop in currentDict) {
+          return currentDict[prop];
+        }
+
+        // Sinon, traduction dynamique de la clé ou de la chaîne
+        return target(prop);
+      },
+    });
+  }, [lang, triggerUpdate]);
 
   return (
-    <LangContext.Provider value={{ lang, toggleLang, t }}>
+    <LangContext.Provider value={{ lang, setLang, toggleLang, translate, t }}>
       {children}
     </LangContext.Provider>
   );
 }
 
-export const useLang = () => useContext(LangContext);
+export const useLang = () => {
+  const context = useContext(LangContext);
+  if (!context) {
+    // Si utilisé en dehors de LangProvider, fallback gracieux autonome
+    const currentLang = getActiveLang();
+    const currentDict = translations[currentLang] || translations.fr || {};
+    return {
+      lang: currentLang,
+      setLang: setActiveLang,
+      toggleLang: toggleActiveLang,
+      translate: (text) => translateText(text, currentLang),
+      t: (text) => currentDict[text] || getCachedTranslation(text, currentLang) || text,
+    };
+  }
+  return context;
+};

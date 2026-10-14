@@ -4,9 +4,10 @@ import { ShopContext } from '../context/ShopContext';
 import { useLang } from '../context/LangContext';
 import Item from '../components/Item';
 import Title from '../components/Title';
+import CategoryTreeFilter from '../components/CategoryTreeFilter';
 
 export default function Collection() {
-  const { products, search, setSearch } = useContext(ShopContext);
+  const { products, search, setSearch, backendUrl } = useContext(ShopContext);
   const { t } = useLang();
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
@@ -14,18 +15,24 @@ export default function Collection() {
   const [priceFilter, setPriceFilter] = useState('');
   const [sortType, setSortType] = useState('relevant');
 
-  const toggleCategory = (e) => {
-    const value = e.target.value;
+  const toggleCategoryValue = (val) => {
     setCategory((prev) =>
-      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
+      prev.includes(val) ? prev.filter((item) => item !== val) : [...prev, val]
     );
   };
 
-  const toggleSubCategory = (e) => {
-    const value = e.target.value;
+  const toggleSubCategoryValue = (val) => {
     setSubCategory((prev) =>
-      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
+      prev.includes(val) ? prev.filter((item) => item !== val) : [...prev, val]
     );
+  };
+
+  const toggleCategory = (e) => {
+    toggleCategoryValue(e.target.value);
+  };
+
+  const toggleSubCategory = (e) => {
+    toggleSubCategoryValue(e.target.value);
   };
 
   const resetAll = () => {
@@ -58,8 +65,8 @@ export default function Collection() {
         const itemCategories = Array.isArray(item.category)
           ? item.category
           : item.category
-          ? [item.category]
-          : [];
+            ? [item.category]
+            : [];
         return (
           itemCategories.some((c) => category.includes(c)) ||
           category.includes(item.gender)
@@ -67,7 +74,7 @@ export default function Collection() {
       });
     }
 
-    // Brands (subCategory: Nike, Adidas, Puma, etc.)
+    // Brands / subCategories
     if (subCategory.length > 0) {
       productsCopy = productsCopy.filter(
         (item) => subCategory.includes(item.subCategory) || subCategory.includes(item.brand)
@@ -94,11 +101,6 @@ export default function Collection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, subCategory, priceFilter, products, search, sortType]);
 
-  // Marques uniques
-  const dynamicBrands = [...new Set(products.map((item) => item.subCategory).filter(Boolean))];
-  const uniqueBrands =
-    dynamicBrands.length > 0 ? dynamicBrands : ['Adidas', 'Nike', 'Puma', 'New Balance', 'Jordan'];
-
   const priceOptions = [
     { value: '', label: t.allPrices },
     { value: '0-100', label: t.under100 },
@@ -106,55 +108,32 @@ export default function Collection() {
     { value: '200+', label: t.over200 },
   ];
 
-  const genderOptions = [
-    { value: 'Men', label: t.men },
-    { value: 'Women', label: t.women },
-    { value: 'Kids', label: t.kids },
-  ];
-
   return (
     <div className='max-padd-container py-16 flex flex-col sm:flex-row gap-1 sm:gap-10 border-t border-gray-10 bg-primaryLight'>
       {/* Filter Options */}
-      <div className='min-w-60'>
-        <p className='text-xl font-bold text-primary mb-5 uppercase tracking-wide'>{t.filters}</p>
-
-        {/* Brand Filter */}
-        <div className='border border-gray-20 rounded-xl p-5 mb-5 bg-white shadow-sm'>
-          <p className='mb-4 text-sm font-bold text-primary uppercase'>{t.brands}</p>
-          <div className='flex flex-col gap-3 text-sm text-gray-50'>
-            {uniqueBrands.map((brand) => (
-              <label className='flex gap-2 items-center cursor-pointer' key={brand}>
-                <input
-                  className='w-4 h-4 rounded text-tertiary focus:ring-tertiary'
-                  type='checkbox'
-                  value={brand}
-                  checked={subCategory.includes(brand)}
-                  onChange={toggleSubCategory}
-                />
-                <span className='font-medium'>{brand}</span>
-              </label>
-            ))}
-          </div>
+      <div className='min-w-64'>
+        <div className='flex items-center justify-between mb-5'>
+          <p className='text-xl font-bold text-primary uppercase tracking-wide'>{t.filters}</p>
+          {(category.length > 0 || subCategory.length > 0 || priceFilter) && (
+            <button
+              type='button'
+              onClick={resetAll}
+              className='text-xs font-semibold text-[#e63946] hover:underline cursor-pointer'
+            >
+              {t.resetFilters || 'Effacer'}
+            </button>
+          )}
         </div>
 
-        {/* Gender Filter */}
-        <div className='border border-gray-20 rounded-xl p-5 mb-5 bg-white shadow-sm'>
-          <p className='mb-4 text-sm font-bold text-primary uppercase'>{t.gender}</p>
-          <div className='flex flex-col gap-3 text-sm text-gray-50'>
-            {genderOptions.map((g) => (
-              <label className='flex gap-2 items-center cursor-pointer' key={g.value}>
-                <input
-                  className='w-4 h-4 rounded text-tertiary focus:ring-tertiary'
-                  type='checkbox'
-                  value={g.value}
-                  checked={category.includes(g.value)}
-                  onChange={toggleCategory}
-                />
-                <span className='font-medium'>{g.label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
+        {/* Tree Categories & SubCategories Filter */}
+        <CategoryTreeFilter
+          backendUrl={backendUrl}
+          products={products}
+          selectedCategory={category}
+          selectedSubCategory={subCategory}
+          onToggleCategory={toggleCategoryValue}
+          onToggleSubCategory={toggleSubCategoryValue}
+        />
 
         {/* Price Filter */}
         <div className='border border-gray-20 rounded-xl p-5 mb-5 bg-white shadow-sm'>
@@ -163,14 +142,19 @@ export default function Collection() {
             {priceOptions.map((p) => (
               <label className='flex gap-2 items-center cursor-pointer' key={p.value || 'all'}>
                 <input
-                  className='w-4 h-4 rounded text-tertiary focus:ring-tertiary'
+                  className='appearance-none w-5 h-5 shrink-0 rounded-full border-2 border-gray-20 cursor-pointer transition-all
+                 checked:border-tertiary checked:bg-tertiary checked:shadow-[inset_0_0_0_3px_white]
+                 hover:border-tertiary
+                 focus:outline-none focus-visible:ring-2 focus-visible:ring-tertiary'
                   type='radio'
                   name='price'
                   value={p.value}
                   checked={priceFilter === p.value}
                   onChange={() => setPriceFilter(p.value)}
                 />
-                <span className='font-medium'>{p.label}</span>
+                <span className={`font-medium ${priceFilter === p.value ? 'text-tertiary' : ''}`}>
+                  {p.label}
+                </span>
               </label>
             ))}
           </div>

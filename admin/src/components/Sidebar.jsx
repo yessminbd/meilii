@@ -9,6 +9,8 @@ import {
   LogOut,
   ChevronLeft,
   Tag,
+  FolderTree,
+  Palette,
 } from 'lucide-react'
 
 const Sidebar = ({ onLogout }) => {
@@ -19,6 +21,8 @@ const Sidebar = ({ onLogout }) => {
     { to: '/add', icon: <PackagePlus size={20} />, label: 'Add Product' },
     { to: '/orders', icon: <ShoppingBag size={20} />, label: 'Orders' },
     { to: '/list', icon: <List size={20} />, label: 'Products' },
+    { to: '/categories', icon: <FolderTree size={20} />, label: 'Categories' },
+    { to: '/sizes-colors', icon: <Palette size={20} />, label: 'Sizes & Colors' },
     { to: '/promos', icon: <Tag size={20} />, label: 'Promo Codes' },
     { to: '/stats', icon: <BarChart3 size={20} />, label: 'Statistics' },
   ]

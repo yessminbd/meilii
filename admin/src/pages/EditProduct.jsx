@@ -8,7 +8,7 @@ import { BACKEND_URL } from '../components/constants'
 import { useLocalList } from '../hooks/useLocalList'
 import { card, sectionTitle, label, field } from '../components/styles'
 import ImageUpload from '../components/ImageUpload'
-import BrandSelector from '../components/BrandSelector'
+import CategorySubCategorySelector from '../components/CategorySubCategorySelector'
 import ColorPicker from '../components/ColorPicker'
 import SizeSelector from '../components/SizeSelector'
 
@@ -30,25 +30,10 @@ const toArray = (value) => {
 
 const colorName = (c) => (c && typeof c === 'object' ? c.name : c)
 
-const uniq = (arr) => {
-  const seen = new Set()
-  return arr.filter((v) => {
-    if (v === undefined || v === null || v === '') return false
-    const key = String(v).toLowerCase().trim()
-    if (seen.has(key)) return false
-    seen.add(key)
-    return true
-  })
-}
-
-const sortNatural = (arr) =>
-  [...arr].sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }))
-
 const EditProduct = ({ token }) => {
   const { id } = useParams()
   const navigate = useNavigate()
 
-  const [catalog, setCatalog] = useState([]) // all products, used to build the options
   const [fetching, setFetching] = useState(true)
   const [loading, setLoading] = useState(false)
 
@@ -56,7 +41,9 @@ const EditProduct = ({ token }) => {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
-  const [selectedCategories, setSelectedCategories] = useState([])
+  const [originalPrice, setOriginalPrice] = useState('')
+  const [pattern, setPattern] = useState('')
+  const [category, setCategory] = useState('')
   const [subCategory, setSubCategory] = useState('')
   const [popular, setPopular] = useState(false)
 
@@ -65,8 +52,7 @@ const EditProduct = ({ token }) => {
   const [existingImages, setExistingImages] = useState([])
   const [newImages, setNewImages] = useState([null, null, null, null])
 
-  // Custom entries added by the admin (stored locally), no built-in defaults
-  const [customBrands, addBrand] = useLocalList('customBrands', [])
+  // Custom entries added by the admin (stored locally)
   const [customSizes, addSize] = useLocalList('customSizes', [])
   const [customColors, addColor] = useLocalList('customColors', [], (c) => c.name.toLowerCase())
 
@@ -81,7 +67,10 @@ const EditProduct = ({ token }) => {
           setName(p.name || '')
           setDescription(p.description || '')
           setPrice(p.price ?? '')
-          setSelectedCategories(toArray(p.category))
+          setOriginalPrice(p.originalPrice ?? '')
+          setPattern(p.pattern || '')
+          const catArr = toArray(p.category)
+          setCategory(catArr[0] || '')
           setSubCategory(p.subCategory || '')
           setPopular(Boolean(p.popular))
           setSelectedSizes(toArray(p.sizes))
@@ -192,22 +181,10 @@ const EditProduct = ({ token }) => {
     toast.success(`Size ${size} added.`)
   }
 
-  const handleAddBrand = (brand) => {
-    addBrand(brand)
-    toast.success(`Brand "${brand}" added.`)
-  }
-
-  const toggleCategory = (cat) =>
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-    )
-
   const onSubmitHandler = async (e) => {
     e.preventDefault()
-    if (selectedCategories.length === 0) return toast.error('Select at least one category.')
-    if (!subCategory) return toast.error('Select a brand.')
-    if (selectedSizes.length === 0) return toast.error('Select at least one size.')
-    if (selectedColors.length === 0) return toast.error('Select at least one color.')
+    if (!category) return toast.error('Please select a category.')
+    if (!subCategory) return toast.error('Please select a subcategory.')
     if (existingImages.length === 0 && !newImages.some(Boolean)) {
       return toast.error('Product must have at least one image.')
     }
@@ -219,7 +196,9 @@ const EditProduct = ({ token }) => {
       formData.append('name', name)
       formData.append('description', description)
       formData.append('price', price)
-      formData.append('category', JSON.stringify(selectedCategories))
+      formData.append('originalPrice', originalPrice || 0)
+      formData.append('pattern', pattern || '')
+      formData.append('category', JSON.stringify([category]))
       formData.append('subCategory', subCategory)
       formData.append('sizes', JSON.stringify(selectedSizes))
       formData.append('colors', JSON.stringify(selectedColors))
@@ -345,52 +324,58 @@ const EditProduct = ({ token }) => {
               className={`${field} resize-none`}
             />
           </div>
-          <div>
-            <label className={label}>Price (TND)</label>
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
-              min="0"
-              className={field}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className={label}>Selling Price (TND) *</label>
+              <input
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                required
+                min="0"
+                step="any"
+                className={field}
+              />
+            </div>
+            <div>
+              <label className={label}>
+                Original Price (TND) <span className="text-gray-400 font-normal text-xs">(crossed out)</span>
+              </label>
+              <input
+                type="number"
+                value={originalPrice}
+                onChange={(e) => setOriginalPrice(e.target.value)}
+                min="0"
+                step="any"
+                placeholder="e.g. 180"
+                className={field}
+              />
+            </div>
+            <div>
+              <label className={label}>
+                Pattern / Model <span className="text-gray-400 font-normal text-xs">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={pattern}
+                onChange={(e) => setPattern(e.target.value)}
+                placeholder="e.g. Floral, Stripes..."
+                className={field}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Category & Brand */}
+        {/* Category & SubCategory */}
         <div className={card}>
-          <h3 className={sectionTitle}>Category & Brand</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={label}>Categories</label>
-              <div className="flex gap-2 flex-wrap">
-                {categories.length === 0 && (
-                  <span className="text-xs text-gray-400">No categories available.</span>
-                )}
-                {categories.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => toggleCategory(c)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                      selectedCategories.includes(c)
-                        ? 'bg-[#1f1f23] text-white border-[#1f1f23]'
-                        : 'bg-white text-gray-700 border-black/10 hover:border-black/30'
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <BrandSelector
-              brands={brands}
-              value={subCategory}
-              onChange={setSubCategory}
-              onAdd={handleAddBrand}
-            />
-          </div>
+          <h3 className={sectionTitle}>Category & Subcategory</h3>
+          <CategorySubCategorySelector
+            token={token}
+            selectedCategory={category}
+            onCategoryChange={setCategory}
+            subCategory={subCategory}
+            onSubCategoryChange={setSubCategory}
+          />
         </div>
 
         {/* Colors */}

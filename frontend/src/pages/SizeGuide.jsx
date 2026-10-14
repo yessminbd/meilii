@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Ruler, Search, Info, ArrowRight } from "lucide-react";
 import { useLang } from "../context/LangContext";
 
-/* Colonnes : [EU, US, UK, CM (longueur du pied)] */
+/* Colonnes : [EU, US, UK, CM (longueur du pied)] — la colonne CN (mm) est calculée */
 const SIZE_DATA = {
   men: [
     ["36", "4.5", "3.5", "22.5"],
@@ -59,21 +59,74 @@ const SIZE_DATA = {
   ],
 };
 
+/* ───────── Vêtements : tailles chinoises (CN) ─────────
+   Les colonnes (cols) sont des clés de traduction. Valeurs approximatives
+   (norme chinoise GB/T 1335) : les tailles chinoises taillent plus petit qu'en EU/US. */
+const CLOTHING = {
+  men: {
+    cols: ["sgColCN", "sgColCode", "sgColChest", "sgColWaist", "sgColIntl"],
+    rows: [
+      ["S", "165/84A", "84", "70", "XS"],
+      ["M", "170/88A", "88", "74", "S"],
+      ["L", "175/92A", "92", "78", "M"],
+      ["XL", "180/96A", "96", "82", "L"],
+      ["2XL", "185/100A", "100", "86", "XL"],
+      ["3XL", "190/104A", "104", "90", "2XL"],
+      ["4XL", "195/108A", "108", "94", "3XL"],
+    ],
+  },
+  women: {
+    cols: ["sgColCN", "sgColCode", "sgColBust", "sgColWaist", "sgColHips", "sgColIntl"],
+    rows: [
+      ["S", "155/80A", "80", "64", "86", "34 / XS"],
+      ["M", "160/84A", "84", "68", "90", "36 / S"],
+      ["L", "165/88A", "88", "72", "94", "38 / M"],
+      ["XL", "170/92A", "92", "76", "98", "40 / L"],
+      ["2XL", "175/96A", "96", "80", "102", "42 / XL"],
+      ["3XL", "180/100A", "100", "84", "106", "44 / 2XL"],
+    ],
+  },
+  kids: {
+    cols: ["sgColCN", "sgColHeight", "sgColAge", "sgColChest"],
+    rows: [
+      ["90", "90", "1–2", "52"],
+      ["100", "100", "2–3", "54"],
+      ["110", "110", "4–5", "57"],
+      ["120", "120", "6–7", "60"],
+      ["130", "130", "8–9", "64"],
+      ["140", "140", "10–11", "68"],
+      ["150", "150", "12–13", "72"],
+      ["160", "160", "14–15", "76"],
+    ],
+  },
+};
+
+/* id = index dans la ligne. CN = longueur du pied en millimètres (ex. 25 cm → 250) */
 const SYSTEMS = [
   { id: 0, key: "EU" },
   { id: 1, key: "US" },
   { id: 2, key: "UK" },
   { id: 3, key: "CM" },
+  { id: 4, key: "CN" },
 ];
 
 export default function SizeGuide() {
   const { t } = useLang();
+  const [type, setType] = useState("shoes"); // "shoes" | "clothing"
   const [category, setCategory] = useState("men");
   const [system, setSystem] = useState(0); // 0 = EU
   const [picked, setPicked] = useState(null); // ligne cliquée
   const [foot, setFoot] = useState("");
 
-  const rows = SIZE_DATA[category];
+  // Ajoute la colonne CN (mm) à chaque ligne
+  const rows = useMemo(
+    () =>
+      SIZE_DATA[category].map((r) => [
+        ...r,
+        String(Math.round(parseFloat(r[3]) * 10)),
+      ]),
+    [category]
+  );
 
   // Le système choisi passe en première colonne
   const columns = useMemo(
@@ -81,7 +134,7 @@ export default function SizeGuide() {
     [system]
   );
 
-  // Recherche de pointure selon la longueur du pied
+  // Recherche de taille selon la longueur du pied
   const finder = useMemo(() => {
     const v = parseFloat(String(foot).replace(",", "."));
     if (!v || v <= 0) return null;
@@ -99,8 +152,21 @@ export default function SizeGuide() {
     setFoot("");
   };
 
-  const steps = [t.sgStep1, t.sgStep2, t.sgStep3, t.sgStep4];
-  const tips = [t.sgTip1, t.sgTip2, t.sgTip3];
+  const isShoes = type === "shoes";
+  const clothing = CLOTHING[category];
+
+  const changeType = (tp) => {
+    setType(tp);
+    setPicked(null);
+    setFoot("");
+  };
+
+  const steps = isShoes
+    ? [t.sgStep1, t.sgStep2, t.sgStep3, t.sgStep4]
+    : [t.sgClothStep1, t.sgClothStep2, t.sgClothStep3, t.sgClothStep4];
+  const tips = isShoes
+    ? [t.sgTip1, t.sgTip2, t.sgTip3]
+    : [t.sgClothTip1, t.sgClothTip2, t.sgTip3];
 
   return (
     <div className="bg-primaryLight min-h-screen">
@@ -125,13 +191,32 @@ export default function SizeGuide() {
           {t.sizeGuide}
         </h1>
         <p className="sg-anim mt-3 text-sm sm:text-base text-gray-50 max-w-xl mx-auto" style={{ animation: "sg-rise .6s ease-out .1s both" }}>
-          {t.sgSubtitle}
+          {isShoes ? t.sgSubtitle : t.sgClothSubtitle}
         </p>
       </section>
 
       <div className="max-w-5xl mx-auto px-4 pb-20 grid lg:grid-cols-3 gap-8">
         {/* ───────── Colonne principale : tableau ───────── */}
         <div className="lg:col-span-2">
+          {/* Type : chaussures / vêtements */}
+          <div className="inline-flex p-1 mb-4 rounded-full bg-white border border-gray-10 shadow-sm">
+            {[
+              ["shoes", t.sgTabShoes],
+              ["clothing", t.sgTabClothing],
+            ].map(([id, label]) => (
+              <button
+                key={id}
+                onClick={() => changeType(id)}
+                aria-pressed={type === id}
+                className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-200 ${
+                  type === id ? "bg-tertiary text-white shadow" : "text-gray-50 hover:text-primary"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
           {/* Catégories */}
           <div className="flex gap-2 mb-4">
             {[
@@ -153,7 +238,8 @@ export default function SizeGuide() {
             ))}
           </div>
 
-          {/* Sélecteur de système */}
+          {/* Sélecteur de système (chaussures) */}
+          {isShoes && (
           <div className="bg-white rounded-2xl border border-gray-10 p-4 mb-4 flex flex-wrap items-center gap-3">
             <span className="text-xs font-bold text-primary">{t.sgSystemLabel}</span>
             <div className="flex gap-1.5 flex-wrap">
@@ -173,8 +259,55 @@ export default function SizeGuide() {
               ))}
             </div>
           </div>
+          )}
 
-          {/* Tableau */}
+          {/* Tableau vêtements (CN) */}
+          {!isShoes && (
+          <div className="bg-white rounded-2xl border border-gray-10 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-center text-sm">
+                <thead>
+                  <tr className="bg-primary text-white">
+                    {clothing.cols.map((key, i) => (
+                      <th key={key} className={`px-4 py-3 font-bold ${i === 0 ? "bg-tertiary" : ""}`}>
+                        {t[key]}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody key={"c" + category}>
+                  {clothing.rows.map((row, idx) => {
+                    const active = picked === idx;
+                    return (
+                      <tr
+                        key={idx}
+                        onClick={() => setPicked(picked === idx ? null : idx)}
+                        className={`sg-row cursor-pointer border-t border-gray-10 transition-colors duration-200 ${
+                          active ? "bg-tertiary/10" : "hover:bg-primaryLight"
+                        }`}
+                        style={{ animation: `sg-row .35s ease-out ${idx * 0.03}s both` }}
+                      >
+                        {row.map((cell, i) => (
+                          <td
+                            key={i}
+                            className={`px-4 py-2.5 ${
+                              i === 0 ? "font-black text-primary bg-tertiary/5" : "text-gray-50 font-medium"
+                            } ${active && i === 0 ? "text-tertiary" : ""}`}
+                          >
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          )}
+
+          {/* Tableau chaussures */}
+          {isShoes && (
           <div className="bg-white rounded-2xl border border-gray-10 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-center text-sm">
@@ -184,6 +317,7 @@ export default function SizeGuide() {
                       <th key={c} className={`px-4 py-3 font-bold ${i === 0 ? "bg-tertiary" : ""}`}>
                         {SYSTEMS[c].key}
                         {c === 3 && <span className="block text-[10px] font-medium opacity-80">{t.sgFootLength}</span>}
+                        {c === 4 && <span className="block text-[10px] font-medium opacity-80">{t.sgFootLengthMm}</span>}
                       </th>
                     ))}
                   </tr>
@@ -220,15 +354,17 @@ export default function SizeGuide() {
               </table>
             </div>
           </div>
+          )}
           <p className="mt-3 flex items-center gap-1.5 text-xs text-gray-30">
             <Info className="w-3.5 h-3.5 shrink-0" />
-            {t.sgTableHint}
+            {isShoes ? t.sgTableHint : t.sgClothTableHint}
           </p>
         </div>
 
         {/* ───────── Colonne latérale ───────── */}
         <aside className="flex flex-col gap-6">
-          {/* Trouver ma pointure */}
+          {/* Trouver ma taille (chaussures) */}
+          {isShoes && (
           <div className="bg-primary text-white rounded-2xl p-6 shadow-lg">
             <h2 className="flex items-center gap-2 font-black text-lg mb-1">
               <Search className="w-5 h-5 text-tertiary" />
@@ -256,8 +392,8 @@ export default function SizeGuide() {
             {finder && (
               <div className="mt-4 rounded-xl  p-4" style={{ animation: "sg-rise .35s ease-out both" }}>
                 <p className="text-xs text-gray-20 mb-2">{t.sgYourSize}</p>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  {[0, 1, 2].map((c) => (
+                <div className="grid grid-cols-2 gap-2 text-center">
+                  {[0, 1, 2, 4].map((c) => (
                     <div key={c} className="rounded-lg bg-white/10 py-2">
                       <p className="text-[10px] font-bold text-gray-20">{SYSTEMS[c].key}</p>
                       <p className="text-lg font-black text-tertiary">{rows[finder.idx][c]}</p>
@@ -272,10 +408,11 @@ export default function SizeGuide() {
               </div>
             )}
           </div>
+          )}
 
           {/* Comment mesurer */}
           <div className="bg-white rounded-2xl border border-gray-10 p-6">
-            <h2 className="font-black text-primary text-lg mb-4">{t.sgHowTitle}</h2>
+            <h2 className="font-black text-primary text-lg mb-4">{isShoes ? t.sgHowTitle : t.sgClothHowTitle}</h2>
             <ol className="flex flex-col gap-3">
               {steps.map((s, i) => (
                 <li key={i} className="flex gap-3 text-sm text-gray-50 leading-relaxed">
@@ -298,7 +435,7 @@ export default function SizeGuide() {
                 </li>
               ))}
             </ul>
-            <p className="mt-4 pt-4 border-t border-gray-10 text-[11px] text-gray-30">{t.sgNote}</p>
+            <p className="mt-4 pt-4 border-t border-gray-10 text-[11px] text-gray-30">{isShoes ? t.sgNote : t.sgClothNote}</p>
           </div>
 
           <Link

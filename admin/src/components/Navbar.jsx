@@ -1,7 +1,7 @@
 import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
-import logo from '../assets/shoebox_logo.png'
+import logo from '../assets/logo-meili.png'
 
 const pageTitles = {
   '/': 'Dashboard',
@@ -29,7 +29,7 @@ const Navbar = ({ search, setSearch }) => {
       {/* Left: logo + Admin below, then page title */}
       <div className="flex items-center gap-5">
         <div className="flex flex-col items-center leading-none">
-          <img src={logo} alt="Shoe Box" className="h-9 w-auto object-contain" />
+          <img src={logo} alt="Měilì" className="h-9 w-auto object-contain" />
         </div>
       </div>
 

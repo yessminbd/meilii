@@ -19,7 +19,7 @@ import {
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import { useLang } from "../context/LangContext";
-import logo from "../assets/shoebox_logo.png";
+import logo from '../assets/logo-meili.png'
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -64,7 +64,7 @@ export default function Header() {
         >
           <img
             src={logo}
-            alt="Shoe Box"
+            alt="Měilì"
             className="h-8 sm:h-9 w-auto object-contain"
           />
         </Link>

@@ -30,23 +30,25 @@ const Item = ({ product }) => {
             <div className='p-4 flex flex-col flex-1 justify-between'>
                 <div>
                     <div className='flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-gray-50'>
-                        <span className='text-tertiary'>{product.subCategory || category}</span>
+                        <span className='text-tertiary'>{t(product.subCategory || category)}</span>
                         {product.subCategory && category && (
-                            <span className='text-gray-30 text-[10px]'>{category}</span>
+                            <span className='text-gray-30 text-[10px]'>{t(category)}</span>
                         )}
                     </div>
                     <h4 className='text-base font-bold text-primary line-clamp-1 mt-0.5 group-hover:text-tertiary transition-colors'>
-                        {product.name}
+                        {t(product.name)}
                     </h4>
                     <p className='text-xs text-gray-50 line-clamp-2 mt-1 leading-relaxed'>
-                        {product.description}
+                        {t(product.description)}
                     </p>
                 </div>
 
                 <div className='flex items-center justify-between pt-4 mt-3 border-t border-gray-10'>
-                    <span className='text-base font-extrabold text-primary'>
-                        {product.price} <span className='text-xs font-semibold text-tertiary'>DT</span>
-                    </span>
+                    <div className='flex items-baseline gap-1.5'>
+                        <span className='text-base font-extrabold text-primary'>
+                            {product.price} <span className='text-xs font-semibold text-tertiary'>DT</span>
+                        </span>
+                    </div>
                     <Link
                         to={`/product/${product._id}`}
                         className='text-xs font-semibold px-3 py-1.5 rounded-full bg-primary text-white hover:bg-tertiary transition-colors'

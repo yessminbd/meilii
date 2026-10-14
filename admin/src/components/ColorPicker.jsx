@@ -21,7 +21,7 @@ const ColorPicker = ({ colors, selected, onToggle, onAdd }) => {
 
   return (
     <div className={card}>
-      <h3 className={sectionTitle}>Available Colors</h3>
+      <h3 className={sectionTitle}>Available Colors <span className="text-gray-400 font-normal text-xs">(optional)</span></h3>
 
       {/* Color list */}
       <div className="flex flex-wrap gap-2">

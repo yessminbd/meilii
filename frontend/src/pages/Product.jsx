@@ -200,7 +200,7 @@ export default function Product() {
   return (
     <div className="bg-primaryLight/40 min-h-screen border-t border-gray-10/80 pt-6 pb-20">
       <div className="max-padd-container">
-        
+
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs font-semibold text-gray-50 mb-8 overflow-x-auto whitespace-nowrap py-1">
           <Link to="/" className="hover:text-primary transition-colors">Home</Link>
@@ -209,25 +209,25 @@ export default function Product() {
           {productData.category && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-gray-30" />
-              <span className="text-gray-50">{productData.category}</span>
+              <span className="text-gray-50">{t(productData.category)}</span>
             </>
           )}
           {productData.subCategory && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-gray-30" />
-              <span className="text-tertiary font-bold">{productData.subCategory}</span>
+              <span className="text-tertiary font-bold">{t(productData.subCategory)}</span>
             </>
           )}
           <ChevronRight className="w-3.5 h-3.5 text-gray-30" />
-          <span className="text-primary font-bold truncate max-w-[200px]">{productData.name}</span>
+          <span className="text-primary font-bold truncate max-w-[200px]">{t(productData.name)}</span>
         </nav>
 
         {/* Main Product Card */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 bg-white p-6 sm:p-10 rounded-3xl shadow-sm border border-gray-10">
-          
+
           {/* Images Gallery Column */}
           <div className="lg:col-span-6 flex flex-col-reverse sm:flex-row gap-4">
-            
+
             {/* Thumbnails */}
             {imagesList.length > 1 && (
               <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-y-auto sm:w-24 shrink-0 pb-2 sm:pb-0">
@@ -238,11 +238,10 @@ export default function Product() {
                       key={index}
                       type="button"
                       onClick={() => setImage(imgUrl)}
-                      className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-gray-10/50 border-2 transition-all shrink-0 cursor-pointer ${
-                        isActive
+                      className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-gray-10/50 border-2 transition-all shrink-0 cursor-pointer ${isActive
                           ? 'border-tertiary shadow-md scale-102 ring-2 ring-tertiary/20'
                           : 'border-transparent hover:border-gray-20 opacity-80 hover:opacity-100'
-                      }`}
+                        }`}
                     >
                       <img
                         src={imgUrl}
@@ -286,42 +285,34 @@ export default function Product() {
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 {productData.subCategory && (
                   <span className="px-3 py-1 rounded-full bg-primary text-white text-xs font-extrabold uppercase tracking-wider">
-                    {productData.subCategory}
+                    {t(productData.subCategory)}
                   </span>
                 )}
                 {productData.category && (
                   <span className="px-3 py-1 rounded-full bg-gray-10 text-gray-50 text-xs font-bold uppercase tracking-wider">
-                    {productData.category}
+                    {t(productData.category)}
                   </span>
                 )}
                 <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  In Stock
+                  {t("In Stock")}
                 </span>
               </div>
 
               {/* Product Name */}
               <h1 className="text-3xl sm:text-4xl font-black text-primary tracking-tight leading-tight">
-                {productData.name}
+                {t(productData.name)}
               </h1>
 
-              {/* Ratings */}
-              <div className="flex items-center gap-2 mt-3">
-                <div className="flex items-center text-amber-400">
-                  {[1, 2, 3, 4, 5].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-amber-400" />
-                  ))}
-                </div>
-                <span className="text-xs font-bold text-primary">4.9 / 5</span>
-                <span className="text-xs text-gray-30">• (128 reviews)</span>
-              </div>
 
-              {/* Price */}
-              <div className="mt-5 flex items-baseline gap-3">
+
+              {/* Price & Original Price */}
+              <div className="mt-5 flex items-baseline gap-3 flex-wrap">
                 <span className="text-4xl font-black text-primary">
                   {productData.price}{' '}
                   <span className="text-2xl font-bold text-tertiary">{currency || 'DT'}</span>
                 </span>
+
                 <span className="text-xs font-semibold text-gray-50 bg-gray-10 px-2.5 py-1 rounded-md">
                   {t.cashOnDelivery}
                 </span>
@@ -329,7 +320,7 @@ export default function Product() {
 
               {/* Description */}
               <p className="mt-4 text-sm text-gray-50 leading-relaxed">
-                {productData.description}
+                {t(productData.description)}
               </p>
 
               <hr className="my-6 border-gray-10" />
@@ -354,11 +345,10 @@ export default function Product() {
                           key={index}
                           type="button"
                           onClick={() => setColor(colName)}
-                          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                            isSelected
+                          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${isSelected
                               ? 'border-tertiary bg-tertiary/5 text-primary shadow-sm ring-2 ring-tertiary/20'
                               : 'border-gray-20/80 bg-white text-gray-50 hover:border-primary'
-                          }`}
+                            }`}
                         >
                           <span
                             className="w-4 h-4 rounded-full border border-black/15 shrink-0 shadow-xs"
@@ -392,11 +382,10 @@ export default function Product() {
                           key={index}
                           type="button"
                           onClick={() => setSize(s)}
-                          className={`py-3 rounded-xl text-sm font-bold border transition-all cursor-pointer flex items-center justify-center ${
-                            isSelected
+                          className={`py-3 rounded-xl text-sm font-bold border transition-all cursor-pointer flex items-center justify-center ${isSelected
                               ? 'bg-primary text-white border-primary shadow-md scale-102'
                               : 'bg-white text-primary border-gray-20/80 hover:border-primary hover:bg-gray-10/40'
-                          }`}
+                            }`}
                         >
                           {s}
                         </button>
@@ -489,33 +478,30 @@ export default function Product() {
             <button
               type="button"
               onClick={() => setActiveTab('description')}
-              className={`text-sm font-extrabold uppercase tracking-wider pb-2 border-b-2 transition-all cursor-pointer ${
-                activeTab === 'description'
+              className={`text-sm font-extrabold uppercase tracking-wider pb-2 border-b-2 transition-all cursor-pointer ${activeTab === 'description'
                   ? 'border-tertiary text-primary'
                   : 'border-transparent text-gray-30 hover:text-primary'
-              }`}
+                }`}
             >
               {t.tabDescription}
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('specs')}
-              className={`text-sm font-extrabold uppercase tracking-wider pb-2 border-b-2 transition-all cursor-pointer ${
-                activeTab === 'specs'
+              className={`text-sm font-extrabold uppercase tracking-wider pb-2 border-b-2 transition-all cursor-pointer ${activeTab === 'specs'
                   ? 'border-tertiary text-primary'
                   : 'border-transparent text-gray-30 hover:text-primary'
-              }`}
+                }`}
             >
               {t.tabSpecs}
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('shipping')}
-              className={`text-sm font-extrabold uppercase tracking-wider pb-2 border-b-2 transition-all cursor-pointer ${
-                activeTab === 'shipping'
+              className={`text-sm font-extrabold uppercase tracking-wider pb-2 border-b-2 transition-all cursor-pointer ${activeTab === 'shipping'
                   ? 'border-tertiary text-primary'
                   : 'border-transparent text-gray-30 hover:text-primary'
-              }`}
+                }`}
             >
               {t.tabShipping}
             </button>
@@ -523,10 +509,9 @@ export default function Product() {
 
           {activeTab === 'description' && (
             <div className="prose max-w-none text-gray-50 text-sm leading-relaxed space-y-3">
-              <p>{productData.description}</p>
+              <p>{t(productData.description)}</p>
               <p>
-                Every pair of sneakers offered by <strong>Shoe Box</strong> is thoroughly inspected
-                to ensure top-notch build quality and optimal all-day comfort.
+                {t("Every pair of sneakers offered by Měilì is thoroughly inspected to ensure top-notch build quality and optimal all-day comfort.")}
               </p>
             </div>
           )}

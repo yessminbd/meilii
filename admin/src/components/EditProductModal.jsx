@@ -4,10 +4,10 @@ import { toast } from 'react-toastify'
 import { X, Save, Loader2, Trash2, Plus, Star } from 'lucide-react'
 
 import { useLocalList } from '../hooks/useLocalList'
-import { BACKEND_URL, CATEGORIES, BRANDS, SIZES, COLORS } from './constants'
+import { BACKEND_URL, SIZES, COLORS } from './constants'
 import { card, sectionTitle, label, field } from './styles'
 import ImageUpload from './ImageUpload'
-import BrandSelector from './BrandSelector'
+import CategorySubCategorySelector from './CategorySubCategorySelector'
 import ColorPicker from './ColorPicker'
 import SizeSelector from './SizeSelector'
 
@@ -15,14 +15,12 @@ const EditProductModal = ({ product, token, onClose, onUpdated }) => {
   const [name, setName] = useState(product?.name || '')
   const [description, setDescription] = useState(product?.description || '')
   const [price, setPrice] = useState(product?.price || '')
-  const [selectedCategories, setSelectedCategories] = useState(
+  const [category, setCategory] = useState(
     Array.isArray(product?.category)
-      ? product.category
-      : product?.category
-      ? [product.category]
-      : ['Men']
+      ? product.category[0] || ''
+      : product?.category || ''
   )
-  const [subCategory, setSubCategory] = useState(product?.subCategory || 'Nike')
+  const [subCategory, setSubCategory] = useState(product?.subCategory || '')
   const [popular, setPopular] = useState(Boolean(product?.popular))
 
   const [selectedSizes, setSelectedSizes] = useState(product?.sizes || [])
@@ -32,7 +30,6 @@ const EditProductModal = ({ product, token, onClose, onUpdated }) => {
   const [loading, setLoading] = useState(false)
 
   // Lists (defaults + custom saved in localStorage)
-  const [brands, addBrand] = useLocalList('customBrands', BRANDS)
   const [sizes, addSize] = useLocalList('customSizes', SIZES)
   const [colors, addColor] = useLocalList('customColors', COLORS, (c) => c.name.toLowerCase())
 
@@ -42,11 +39,6 @@ const EditProductModal = ({ product, token, onClose, onUpdated }) => {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
-
-  const toggleCategory = (cat) =>
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-    )
 
   const toggle = (setter) => (item) =>
     setter((prev) => (prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]))
@@ -70,16 +62,10 @@ const EditProductModal = ({ product, token, onClose, onUpdated }) => {
     toast.success(`Size ${size} added.`)
   }
 
-  const handleAddBrand = (brand) => {
-    addBrand(brand)
-    toast.success(`Brand "${brand}" added.`)
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (selectedCategories.length === 0) return toast.error('Select at least one category.')
-    if (selectedSizes.length === 0) return toast.error('Select at least one size.')
-    if (selectedColors.length === 0) return toast.error('Select at least one color.')
+    if (!category) return toast.error('Please select a category.')
+    if (!subCategory) return toast.error('Please select a subcategory.')
     if (existingImages.length === 0 && !newImages.some(Boolean)) {
       return toast.error('Product must have at least one image.')
     }
@@ -91,7 +77,7 @@ const EditProductModal = ({ product, token, onClose, onUpdated }) => {
       formData.append('name', name)
       formData.append('description', description)
       formData.append('price', price)
-      formData.append('category', JSON.stringify(selectedCategories))
+      formData.append('category', JSON.stringify([category]))
       formData.append('subCategory', subCategory)
       formData.append('sizes', JSON.stringify(selectedSizes))
       formData.append('colors', JSON.stringify(selectedColors))
@@ -229,35 +215,16 @@ const EditProductModal = ({ product, token, onClose, onUpdated }) => {
           </div>
 
           {/* Category & Brand */}
+          {/* Category & SubCategory */}
           <div className={card}>
-            <h3 className={sectionTitle}>Category & Brand</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className={label}>Category</label>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {CATEGORIES.map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => toggleCategory(c)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                        selectedCategories.includes(c)
-                          ? 'bg-[#1f1f23] text-white border-[#1f1f23]'
-                          : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
-                      }`}
-                    >
-                      {c}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <BrandSelector
-                brands={brands}
-                value={subCategory}
-                onChange={setSubCategory}
-                onAdd={handleAddBrand}
-              />
-            </div>
+            <h3 className={sectionTitle}>Category & Subcategory</h3>
+            <CategorySubCategorySelector
+              token={token}
+              selectedCategory={category}
+              onCategoryChange={setCategory}
+              subCategory={subCategory}
+              onSubCategoryChange={setSubCategory}
+            />
           </div>
 
           {/* Colors */}

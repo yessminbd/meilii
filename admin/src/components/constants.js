@@ -9,7 +9,10 @@ export const CATEGORIES = ['Women', 'Men', 'Kids']
 // use useProductConfig() instead.
 // ──────────────────────────────────────────────────────────────────────────────
 export const BRANDS = ['Adidas', 'Nike', 'Puma', 'New Balance', 'Reebok', 'Jordan', 'Vans', 'Converse']
-export const SIZES = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46']
+export const SIZES = [
+  'XS', 'S', 'M', 'L', 'XL', 'XXL',
+  '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46'
+]
 export const COLORS = [
   { name: 'Black', hex: '#1a1a1a' },
   { name: 'White', hex: '#f5f5f5' },

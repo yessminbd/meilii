@@ -12,6 +12,8 @@ import ListProducts from './pages/ListProducts'
 import Orders from './pages/Orders'
 import Promos from './pages/Promos'
 import Stats from './pages/Stats'
+import Categories from './pages/Categories'
+import SizesColors from './pages/SizesColors'
 import Sidebar from './components/Sidebar'
 import Navbar from './components/Navbar'
 
@@ -47,6 +49,8 @@ export default function App() {
               <Route path="/add" element={<AddProduct token={token} />} />
               <Route path="/edit/:id" element={<EditProduct token={token} />} />
               <Route path="/list" element={<ListProducts token={token} globalSearch={globalSearch} />} />
+              <Route path="/categories" element={<Categories token={token} />} />
+              <Route path="/sizes-colors" element={<SizesColors token={token} />} />
               <Route path="/orders" element={<Orders token={token} globalSearch={globalSearch} />} />
               <Route path="/promos" element={<Promos token={token} />} />
             </Routes>

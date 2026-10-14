@@ -20,10 +20,16 @@ const placeOrder = async (req, res) => {
         const { userId, items, amount, address } = req.body
         const orderData = {
             userId,
-            items, amount, paymentMethod: 'COD', address,
+            items, 
+            amount, 
+            paymentMethod: 'COD', 
+            address,
             payment: false,
+            status: 'Order Placed',
+            advanceAmount: 0,
+            advancePaid: false,
+            remainingAmount: amount,
             date: Date.now()
-
         }
         const newOrder = new orderModel(orderData)
         await newOrder.save()
@@ -186,4 +192,39 @@ const updateStatus = async (req, res) => {
     }
 }
 
-export { placeOrder, placeOrderStrip, allOrders, userOrders, updateStatus, verifyStripe }
+// update Advance & validate order (admin)
+const updateAdvance = async (req, res) => {
+    try {
+        const { orderId, advanceAmount, advancePaid, status } = req.body
+
+        const order = await orderModel.findById(orderId)
+        if (!order) {
+            return res.json({ success: false, message: "Commande introuvable" })
+        }
+
+        const advanceNum = Number(advanceAmount) || 0
+        const isPaid = advancePaid === true || advancePaid === 'true'
+        const remaining = Math.max(0, (order.amount || 0) - advanceNum)
+
+        const updateData = {
+            advanceAmount: advanceNum,
+            advancePaid: isPaid,
+            remainingAmount: remaining,
+        }
+
+        // Si un nouveau statut est fourni ou si l'avance est validée, faire progresser la commande
+        if (status) {
+            updateData.status = status
+        } else if (isPaid && order.status === 'Order Placed') {
+            updateData.status = 'Packing'
+        }
+
+        const updated = await orderModel.findByIdAndUpdate(orderId, updateData, { new: true })
+        res.json({ success: true, message: "Avance mise à jour avec succès", order: updated })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+export { placeOrder, placeOrderStrip, allOrders, userOrders, updateStatus, updateAdvance, verifyStripe }
