@@ -1,10 +1,50 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { ShopContext } from '../context/ShopContext';
 import { useLang } from '../context/LangContext';
 import Item from '../components/Item';
 import Title from '../components/Title';
 import CategoryTreeFilter from '../components/CategoryTreeFilter';
+
+/* Section de filtre repliable (ouvrir / fermer) */
+function FilterSection({ title, children, defaultOpen = true, badge = 0 }) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <div className='border border-gray-20 rounded-xl mb-5 bg-white shadow-sm overflow-hidden'>
+      <button
+        type='button'
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className='w-full flex items-center justify-between gap-3 px-5 py-4 cursor-pointer'
+      >
+        <span className='flex items-center gap-2'>
+          <span className='text-sm font-bold text-primary uppercase'>{title}</span>
+          {badge > 0 && (
+            <span className='min-w-5 h-5 px-1.5 rounded-full bg-tertiary text-white text-xs font-semibold flex items-center justify-center'>
+              {badge}
+            </span>
+          )}
+        </span>
+        <ChevronDown
+          className={`w-4 h-4 text-primary transition-transform duration-300 ${
+            open ? 'rotate-180' : ''
+          }`}
+        />
+      </button>
+
+      <div
+        className={`grid transition-all duration-300 ease-in-out ${
+          open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className='overflow-hidden'>
+          <div className='px-5 pb-5'>{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Collection() {
   const { products, search, setSearch, backendUrl } = useContext(ShopContext);
@@ -13,7 +53,6 @@ export default function Collection() {
   const [category, setCategory] = useState([]);
   const [subCategory, setSubCategory] = useState([]);
   const [priceFilter, setPriceFilter] = useState('');
-  const [sortType, setSortType] = useState('relevant');
 
   const toggleCategoryValue = (val) => {
     setCategory((prev) =>
@@ -27,19 +66,10 @@ export default function Collection() {
     );
   };
 
-  const toggleCategory = (e) => {
-    toggleCategoryValue(e.target.value);
-  };
-
-  const toggleSubCategory = (e) => {
-    toggleSubCategoryValue(e.target.value);
-  };
-
   const resetAll = () => {
     setCategory([]);
     setSubCategory([]);
     setPriceFilter('');
-    setSortType('relevant');
     if (typeof setSearch === 'function') setSearch('');
   };
 
@@ -89,17 +119,13 @@ export default function Collection() {
       productsCopy = productsCopy.filter((item) => item.price > 200);
     }
 
-    // Tri appliqué dans la même passe pour ne jamais être perdu
-    if (sortType === 'low-high') productsCopy.sort((a, b) => a.price - b.price);
-    if (sortType === 'high-low') productsCopy.sort((a, b) => b.price - a.price);
-
     setFilterProducts(productsCopy);
   };
 
   useEffect(() => {
     applyFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, subCategory, priceFilter, products, search, sortType]);
+  }, [category, subCategory, priceFilter, products, search]);
 
   const priceOptions = [
     { value: '', label: t.allPrices },
@@ -125,19 +151,23 @@ export default function Collection() {
           )}
         </div>
 
-        {/* Tree Categories & SubCategories Filter */}
-        <CategoryTreeFilter
-          backendUrl={backendUrl}
-          products={products}
-          selectedCategory={category}
-          selectedSubCategory={subCategory}
-          onToggleCategory={toggleCategoryValue}
-          onToggleSubCategory={toggleSubCategoryValue}
-        />
+        {/* Categories & SubCategories (repliable) */}
+        <FilterSection
+          title={t.categories || 'Catégories'}
+          badge={category.length + subCategory.length}
+        >
+          <CategoryTreeFilter
+            backendUrl={backendUrl}
+            products={products}
+            selectedCategory={category}
+            selectedSubCategory={subCategory}
+            onToggleCategory={toggleCategoryValue}
+            onToggleSubCategory={toggleSubCategoryValue}
+          />
+        </FilterSection>
 
-        {/* Price Filter */}
-        <div className='border border-gray-20 rounded-xl p-5 mb-5 bg-white shadow-sm'>
-          <p className='mb-4 text-sm font-bold text-primary uppercase'>{t.price}</p>
+        {/* Price Filter (repliable) */}
+        <FilterSection title={t.price} badge={priceFilter ? 1 : 0}>
           <div className='flex flex-col gap-3 text-sm text-gray-50'>
             {priceOptions.map((p) => (
               <label className='flex gap-2 items-center cursor-pointer' key={p.value || 'all'}>
@@ -158,24 +188,13 @@ export default function Collection() {
               </label>
             ))}
           </div>
-        </div>
+        </FilterSection>
       </div>
 
       {/* Right Side */}
       <div className='flex-1'>
-        <div className='flex justify-between items-center text-base sm:text-2xl mb-8'>
+        <div className='flex items-center text-base sm:text-2xl mb-8'>
           <Title title={t.allCollection} />
-
-          {/* Product Sort */}
-          <select
-            value={sortType}
-            onChange={(e) => setSortType(e.target.value)}
-            className='border border-gray-20 rounded-lg text-sm px-4 py-2 bg-white text-primary focus:outline-none focus:ring-1 focus:ring-tertiary font-medium'
-          >
-            <option value='relevant'>{t.sortRelevant}</option>
-            <option value='low-high'>{t.sortLowHigh}</option>
-            <option value='high-low'>{t.sortHighLow}</option>
-          </select>
         </div>
 
         {/* Products or empty state */}
