@@ -7,7 +7,7 @@ import Title from '../components/Title';
 import CategoryTreeFilter from '../components/CategoryTreeFilter';
 
 /* Section de filtre repliable (ouvrir / fermer) */
-function FilterSection({ title, children, defaultOpen = true, badge = 0 }) {
+function FilterSection({ title, children, defaultOpen = false, badge = 0, className = '' }) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
@@ -39,7 +39,7 @@ function FilterSection({ title, children, defaultOpen = true, badge = 0 }) {
         }`}
       >
         <div className='overflow-hidden'>
-          <div className='px-5 pb-5'>{children}</div>
+          <div className={`px-5 pb-5 ${className}`}>{children}</div>
         </div>
       </div>
     </div>
@@ -155,6 +155,7 @@ export default function Collection() {
         <FilterSection
           title={t.categories || 'Catégories'}
           badge={category.length + subCategory.length}
+          className='[&>div]:!border-0 [&>div]:!shadow-none [&>div]:!p-0 [&>div]:!m-0 [&>div]:!rounded-none [&>div]:!bg-transparent [&>div>:first-child]:hidden'
         >
           <CategoryTreeFilter
             backendUrl={backendUrl}
